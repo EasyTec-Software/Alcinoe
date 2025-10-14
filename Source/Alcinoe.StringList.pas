@@ -33,15 +33,15 @@ interface
 
 {$I Alcinoe.inc}
 
-{$IFNDEF ALCompilerVersionSupported123}
-  {$  MESSAGE WARN 'Check if System.classes.TStringsEnumerator didn''t change and adjust the IFDEF'}
+{$IFNDEF ALCompilerVersionSupported130}
+  {$MESSAGE WARN 'Check if System.classes.TStringsEnumerator didn''t change and adjust the IFDEF'}
 {$ENDIF}
 
-{$IFNDEF ALCompilerVersionSupported123}
+{$IFNDEF ALCompilerVersionSupported130}
   {$MESSAGE WARN 'Check if System.classes.TStrings didn''t change and adjust the IFDEF'}
 {$ENDIF}
 
-{$IFNDEF ALCompilerVersionSupported123}
+{$IFNDEF ALCompilerVersionSupported130}
   {$MESSAGE WARN 'Check if System.classes.TStringList didn''t change and adjust the IFDEF'}
 {$ENDIF}
 
@@ -87,6 +87,7 @@ Type
     FNameValueSeparator: AnsiChar;
     FStrictDelimiter: Boolean;
     FUpdateCount: Integer;
+    FTrailingLineBreak: Boolean;
     FProtectedSave: Boolean;
     function GetCommaText: AnsiString;
     function GetDelimitedText: AnsiString;
@@ -132,6 +133,7 @@ Type
     //[deleted from Tstrings] property StringsAdapter: IStringsAdapter read FAdapter write SetStringsAdapter;
     //[deleted from Tstrings] destructor Destroy; override;
     constructor Create; virtual;
+    function ItemHasNameValue(Index: Integer): Boolean; virtual; // [added from Tstrings]
     function Add(const S: AnsiString): Integer; virtual;
     function AddObject(const S: AnsiString; AObject: TObject): Integer; virtual;
     function AddNameValue(const Name, Value: AnsiString): Integer; virtual; // [added from Tstrings]
@@ -189,6 +191,13 @@ Type
     property StrictDelimiter: Boolean read fStrictDelimiter write fStrictDelimiter;
     property Strings[Index: Integer]: AnsiString read Get write Put; default;
     property Text: AnsiString read GetTextStr write SetTextStr;
+    /// <summary>
+    ///    When TrailingLineBreak property is True (default value) then Text property
+    ///    will contain line break after last line. When it is False, then Text value
+    ///    will not contain line break after last line. This also may be controlled
+    ///    by soTrailingLineBreak option.
+    /// </summary>
+    property TrailingLineBreak: Boolean read FTrailingLineBreak write FTrailingLineBreak;
     property ProtectedSave: Boolean read fProtectedSave write fProtectedSave;
   end;
 
@@ -215,7 +224,7 @@ Type
     FSorted: Boolean;
     FDuplicates: TDuplicates;
     FCaseSensitive: Boolean;
-    FOnChange: TNotifyEvent;
+    FOnChanged: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOwnsObject: Boolean;
     FNameValueOptimization: Boolean;
@@ -262,7 +271,7 @@ Type
     property Duplicates: TDuplicates read FDuplicates write FDuplicates;
     property Sorted: Boolean read FSorted write SetSorted;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OwnsObjects: Boolean read FOwnsObject write FOwnsObject;
     property NameValueOptimization: Boolean read FNameValueOptimization write FNameValueOptimization;
@@ -293,7 +302,7 @@ Type
     FSorted: Boolean;
     FDuplicates: TDuplicates;
     FCaseSensitive: Boolean;
-    FOnChange: TNotifyEvent;
+    FOnChanged: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOwnsObject: Boolean;
     procedure ExchangeItems(Index1, Index2: Integer);
@@ -333,6 +342,7 @@ Type
     constructor Create; overload; override;
     constructor Create(OwnsObjects: Boolean); reintroduce; overload;
     destructor Destroy; override;
+    function ItemHasNameValue(Index: Integer): Boolean; override;
     function Add(const S: AnsiString): Integer; override;
     function AddObject(const S: AnsiString; AObject: TObject): Integer; override;
     function AddNameValue(const Name, Value: AnsiString): Integer; override; // [added from Tstrings]
@@ -357,7 +367,7 @@ Type
     property Duplicates: TDuplicates read FDuplicates write FDuplicates;
     property Sorted: Boolean read FSorted write SetSorted;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OwnsObjects: Boolean read FOwnsObject write FOwnsObject;
   end;
@@ -391,7 +401,7 @@ Type
     FNodeList: TObjectList<TALHashedStringListDictionaryNodeA>;
     FDictionary: TObjectDictionary<ansiString, TALHashedStringListDictionaryNodeA>;
     FDuplicates: TDuplicates;
-    FOnChange: TNotifyEvent;
+    FOnChanged: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOwnsObject: Boolean;
     FCaseSensitive: boolean;
@@ -431,6 +441,7 @@ Type
     constructor Create(ACapacity: Integer); reintroduce; overload; //[added from Tstrings]
     constructor Create(OwnsObjects: Boolean; ACapacity: Integer); reintroduce; overload; //[added from Tstrings]
     destructor Destroy; override;
+    function ItemHasNameValue(Index: Integer): Boolean; override;
     function Add(const S: AnsiString): Integer; override;
     function AddObject(const S: AnsiString; AObject: TObject): Integer; override;
     function AddNameValue(const Name, Value: AnsiString): Integer; override; // [added from Tstrings]
@@ -450,7 +461,7 @@ Type
     procedure CustomSort(Compare: TALHashedStringListSortCompareA); virtual;
     property Duplicates: TDuplicates read FDuplicates write SetDuplicates;
     property CaseSensitive: Boolean read GetCaseSensitive write SetCaseSensitive;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OwnsObjects: Boolean read FOwnsObject write FOwnsObject;
   end;
@@ -486,6 +497,7 @@ Type
     FStrictDelimiter: Boolean;
     FUpdateCount: Integer;
     FWriteBOM: Boolean;
+    FTrailingLineBreak: Boolean;
     FProtectedSave: Boolean;
     function GetCommaText: String;
     function GetDelimitedText: String;
@@ -525,6 +537,7 @@ Type
     //[deleted from Tstrings] property StringsAdapter: IStringsAdapter read FAdapter write SetStringsAdapter;
     constructor Create; virtual;
     destructor Destroy; override;
+    function ItemHasNameValue(Index: Integer): Boolean; virtual; // [added from Tstrings]
     function Add(const S: String): Integer; virtual;
     function AddObject(const S: String; AObject: TObject): Integer; virtual;
     function AddNameValue(const Name, Value: String): Integer; virtual; // [added from Tstrings]
@@ -587,6 +600,13 @@ Type
     property Strings[Index: Integer]: String read Get write Put; default;
     property Text: String read GetTextStr write SetTextStr;
     property WriteBOM: Boolean read FWriteBOM write FWriteBOM;
+    /// <summary>
+    ///    When TrailingLineBreak property is True (default value) then Text property
+    ///    will contain line break after last line. When it is False, then Text value
+    ///    will not contain line break after last line. This also may be controlled
+    ///    by soTrailingLineBreak option.
+    /// </summary>
+    property TrailingLineBreak: Boolean read FTrailingLineBreak write FTrailingLineBreak;
     property ProtectedSave: Boolean read fProtectedSave write fProtectedSave;
   end;
 
@@ -613,7 +633,7 @@ Type
     FSorted: Boolean;
     FDuplicates: TDuplicates;
     FCaseSensitive: Boolean;
-    FOnChange: TNotifyEvent;
+    FOnChanged: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOwnsObject: Boolean;
     FNameValueOptimization: Boolean;
@@ -660,7 +680,7 @@ Type
     property Duplicates: TDuplicates read FDuplicates write FDuplicates;
     property Sorted: Boolean read FSorted write SetSorted;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OwnsObjects: Boolean read FOwnsObject write FOwnsObject;
     property NameValueOptimization: Boolean read FNameValueOptimization write FNameValueOptimization;
@@ -691,7 +711,7 @@ Type
     FSorted: Boolean;
     FDuplicates: TDuplicates;
     FCaseSensitive: Boolean;
-    FOnChange: TNotifyEvent;
+    FOnChanged: TNotifyEvent;
     FOnChanging: TNotifyEvent;
     FOwnsObject: Boolean;
     procedure ExchangeItems(Index1, Index2: Integer);
@@ -731,6 +751,7 @@ Type
     constructor Create; overload; override;
     constructor Create(OwnsObjects: Boolean); reintroduce; overload;
     destructor Destroy; override;
+    function ItemHasNameValue(Index: Integer): Boolean; override;
     function Add(const S: String): Integer; override;
     function AddObject(const S: String; AObject: TObject): Integer; override;
     function AddNameValue(const Name, Value: String): Integer; override; // [added from Tstrings]
@@ -755,7 +776,7 @@ Type
     property Duplicates: TDuplicates read FDuplicates write FDuplicates;
     property Sorted: Boolean read FSorted write SetSorted;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
-    property OnChange: TNotifyEvent read FOnChange write FOnChange;
+    property OnChanged: TNotifyEvent read FOnChanged write FOnChanged;
     property OnChanging: TNotifyEvent read FOnChanging write FOnChanging;
     property OwnsObjects: Boolean read FOwnsObject write FOwnsObject;
   end;
@@ -802,7 +823,14 @@ begin
   FNameValueSeparator := '=';
   FStrictDelimiter:= False;
   FUpdateCount:= 0;
+  FTrailingLineBreak := True;
   fProtectedSave := False;
+end;
+
+{*************************************************************}
+function TALStringsA.ItemHasNameValue(Index: Integer): Boolean;
+begin
+  Result := ALPosA(NameValueSeparator, Get(Index)) > 0;
 end;
 
 {*****************************************************}
@@ -895,6 +923,7 @@ begin
       Delimiter := TALStringsA(Source).Delimiter;
       LineBreak := TALStringsA(Source).LineBreak;
       StrictDelimiter := TALStringsA(Source).StrictDelimiter;
+      TrailingLineBreak := TALStringsA(Source).TrailingLineBreak;
       AddStrings(TALStringsA(Source));
     finally
       EndUpdate;
@@ -911,6 +940,7 @@ begin
       Delimiter := AnsiChar(TStrings(Source).Delimiter);
       LineBreak := AnsiString(TStrings(Source).LineBreak);
       StrictDelimiter := TStrings(Source).StrictDelimiter;
+      TrailingLineBreak := True;
       for I := 0 to Tstrings(Source).Count - 1 do
         AddObject(Ansistring(Tstrings(Source)[I]), Tstrings(Source).Objects[I]);
     finally
@@ -1186,6 +1216,7 @@ begin
   Size := 0;
   LB := LineBreak;
   for I := 0 to Count - 1 do Inc(Size, Length(Get(I)) + Length(LB));
+  if (Size > 0) and (not TrailingLineBreak) then dec(Size, Length(LB));
   SetString(Result, nil, Size);
   P := Pointer(Result);
   for I := 0 to Count - 1 do
@@ -1197,11 +1228,14 @@ begin
       ALMove(Pointer(S)^, P^, L);
       Inc(P, L);
     end;
-    L := Length(LB);
-    if L <> 0 then
+    if TrailingLineBreak or (I < Count - 1) then
     begin
-      ALMove(Pointer(LB)^, P^, L);
-      Inc(P, L);
+      L := Length(LB);
+      if L <> 0 then
+      begin
+        ALMove(Pointer(LB)^, P^, L);
+        Inc(P, L);
+      end;
     end;
   end;
 end;
@@ -1717,7 +1751,7 @@ var
   I: Integer;
   Temp: Array of TObject;
 begin
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
 
   // If the list owns the Objects gather them and free after the list is disposed
@@ -1808,8 +1842,8 @@ end;
 {*******************************}
 procedure TALStringListA.Changed;
 begin
-  if (FUpdateCount = 0) and Assigned(FOnChange) then
-    FOnChange(Self);
+  if (FUpdateCount = 0) and Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 {********************************}
@@ -2023,19 +2057,8 @@ end;
 
 {****************************}
 procedure TALStringListA.Grow;
-{$IF CompilerVersion <= 32}{tokyo}
-var
-  Delta: Integer;
-{$endif}
 begin
-  {$IF CompilerVersion <= 32}{tokyo}
-  if FCapacity > 64 then Delta := FCapacity div 4 else
-    if FCapacity > 8 then Delta := 16 else
-      Delta := 4;
-  SetCapacity(FCapacity + Delta);
-  {$else}
   SetCapacity(GrowCollection(FCapacity, FCount + 1));
-  {$endif}
 end;
 
 {************************************************************}
@@ -2411,7 +2434,7 @@ begin
   FSorted := False;
   FDuplicates := dupIgnore;
   FCaseSensitive := False;
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
   FOwnsObject := OwnsObjects;
   FNameValueOptimization := True;
@@ -2453,7 +2476,7 @@ var
   I: Integer;
   Temp: Array of TObject;
 begin
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
 
   // If the list owns the Objects gather them and free after the list is disposed
@@ -2580,8 +2603,8 @@ end;
 {*********************************}
 procedure TALNVStringListA.Changed;
 begin
-  if (FUpdateCount = 0) and Assigned(FOnChange) then
-    FOnChange(Self);
+  if (FUpdateCount = 0) and Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 {**********************************}
@@ -2890,19 +2913,8 @@ end;
 
 {******************************}
 procedure TALNVStringListA.Grow;
-{$IF CompilerVersion <= 32}{tokyo}
-var
-  Delta: Integer;
-{$endif}
 begin
-  {$IF CompilerVersion <= 32}{tokyo}
-  if FCapacity > 64 then Delta := FCapacity div 4 else
-    if FCapacity > 8 then Delta := 16 else
-      Delta := 4;
-  SetCapacity(FCapacity + Delta);
-  {$else}
   SetCapacity(GrowCollection(FCapacity, FCount + 1));
-  {$endif}
 end;
 
 {***********************************************}
@@ -2920,6 +2932,7 @@ begin
     if FList[i].fNvs then Inc(Size, Length(FList[i].fName) + 1{length(NameValueSeparator)} +  Length(FList[i].fValue) + Length(LB))
     else Inc(Size, Length(FList[i].fName) + Length(LB))
   end;
+  if (Size > 0) and (not TrailingLineBreak) then dec(Size, Length(LB));
   SetString(Result, nil, Size);
   P := Pointer(Result);
   for I := 0 to FCount - 1 do
@@ -2942,11 +2955,14 @@ begin
         Inc(P, L);
       end;
     end;
-    L := Length(LB);
-    if L <> 0 then
+    if TrailingLineBreak or (I < Count - 1) then
     begin
-      ALMove(Pointer(LB)^, P^, L);
-      Inc(P, L);
+      L := Length(LB);
+      if L <> 0 then
+      begin
+        ALMove(Pointer(LB)^, P^, L);
+        Inc(P, L);
+      end;
     end;
   end;
 end;
@@ -3332,7 +3348,7 @@ begin
   FSorted := False;
   FDuplicates := dupIgnore;
   FCaseSensitive := False;
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
   FOwnsObject := OwnsObjects;
 end;
@@ -3382,6 +3398,14 @@ begin
     Name := S;
     Value := '';
   end;
+end;
+
+{******************************************************************}
+function TALNVStringListA.ItemHasNameValue(Index: Integer): Boolean;
+begin
+  if Cardinal(Index) >= Cardinal(FCount) then
+    IndexError(Index, FCount - 1);
+  Result := Flist[Index].FNVS;
 end;
 
 {************************************************************}
@@ -3505,7 +3529,7 @@ var
   I: Integer;
   Temp: Array of TObject;
 begin
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
 
   // If the list owns the Objects gather them and free after the list is disposed
@@ -3598,8 +3622,8 @@ end;
 {*************************************}
 procedure TALHashedStringListA.Changed;
 begin
-  if (FUpdateCount = 0) and Assigned(FOnChange) then
-    FOnChange(Self);
+  if (FUpdateCount = 0) and Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 {**************************************}
@@ -3741,6 +3765,7 @@ begin
     if fNodeList[i].Nvs then Inc(Size, Length(fNodeList[i].ID) + 1{length(NameValueSeparator)} +  Length(fNodeList[i].Val) + Length(LB))
     else Inc(Size, Length(fNodeList[i].ID) + Length(LB))
   end;
+  if (Size > 0) and (not TrailingLineBreak) then dec(Size, Length(LB));
   SetString(Result, nil, Size);
   P := Pointer(Result);
   for I := 0 to Count - 1 do
@@ -3763,11 +3788,14 @@ begin
         Inc(P, L);
       end;
     end;
-    L := Length(LB);
-    if L <> 0 then
+    if TrailingLineBreak or (I < Count - 1) then
     begin
-      ALMove(Pointer(LB)^, P^, L);
-      Inc(P, L);
+      L := Length(LB);
+      if L <> 0 then
+      begin
+        ALMove(Pointer(LB)^, P^, L);
+        Inc(P, L);
+      end;
     end;
   end;
 end;
@@ -3860,12 +3888,7 @@ begin
   LNode.Val := Value;
   LNode.Nvs := True;
   LNode.Obj := AObject;
-  {$IF CompilerVersion <= 32} // tokyo
-  if not Fdictionary.ContainsKey(Name) then Fdictionary.Add(Name,aNode)
-  else begin
-  {$ELSE}
   if not Fdictionary.TryAdd(Name,LNode) then begin
-  {$ENDIF}
     ALFreeAndNil(LNode);
     case Duplicates of
       dupIgnore: Exit;
@@ -3895,12 +3918,7 @@ begin
   LNode.Val := LValue;
   LNode.Nvs := LNvs;
   LNode.Obj := AObject;
-  {$IF CompilerVersion <= 32} // tokyo
-  if not Fdictionary.ContainsKey(aName) then Fdictionary.Add(aName,aNode)
-  else begin
-  {$ELSE}
   if not Fdictionary.TryAdd(LName,LNode) then begin
-  {$ENDIF}
     ALFreeAndNil(LNode);
     case Duplicates of
       dupIgnore: Exit;
@@ -3934,12 +3952,7 @@ begin
     LNewNode.Val := LNewValue;
     LNewNode.NVS := LNewNvs;
     LNewNode.Obj := LOldNode.Obj;
-    {$IF CompilerVersion <= 32} // tokyo
-    if not Fdictionary.ContainsKey(aNewName) then Fdictionary.Add(aNewName, aNewNode)
-    else begin
-    {$ELSE}
     if not Fdictionary.TryAdd(LNewName, LNewNode) then begin
-    {$ENDIF}
       ALFreeAndNil(LNewNode);
       case Duplicates of
         dupIgnore: Exit;
@@ -4090,7 +4103,7 @@ begin
   FNodeList := TObjectList<TALHashedStringListDictionaryNodeA>.Create(False);
   FNodeList.Capacity := ACapacity;
   FDuplicates := dupError;
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
   FOwnsObject := OwnsObjects;
 end;
@@ -4126,7 +4139,7 @@ end;
 type
 
   {*************************************}
-  {$IFNDEF ALCompilerVersionSupported123}
+  {$IFNDEF ALCompilerVersionSupported130}
     {$MESSAGE WARN 'Check if System.Generics.Collections.TObjectDictionary<K,V> was not updated and adjust the IFDEF'}
   {$ENDIF}
   _TObjectDictionaryAccessPrivate<K,V> = class(TObjectDictionary<K,V>)
@@ -4177,6 +4190,14 @@ begin
     Name := S;
     Value := '';
   end;
+end;
+
+{**********************************************************************}
+function TALHashedStringListA.ItemHasNameValue(Index: Integer): Boolean;
+begin
+  if Cardinal(Index) >= Cardinal(Count) then
+    IndexError(Index, Count - 1);
+  Result := FNodelist[Index].Nvs;
 end;
 
 {****************************************************************}
@@ -4329,6 +4350,7 @@ begin
   FNameValueSeparator := '=';
   FStrictDelimiter:= False;
   FUpdateCount:= 0;
+  FTrailingLineBreak := True;
   fProtectedSave := False;
 end;
 
@@ -4340,6 +4362,12 @@ begin
   if (FDefaultEncoding <> nil) and (not TEncoding.IsStandardEncoding(FDefaultEncoding)) then
     ALFreeAndNil(FDefaultEncoding);
   inherited Destroy;
+end;
+
+{*************************************************************}
+function TALStringsW.ItemHasNameValue(Index: Integer): Boolean;
+begin
+  Result := ALPosW(NameValueSeparator, Get(Index)) > 0;
 end;
 
 {*************************************************}
@@ -4437,6 +4465,7 @@ begin
       LineBreak := TALStringsW(Source).LineBreak;
       StrictDelimiter := TALStringsW(Source).StrictDelimiter;
       WriteBOM := TALStringsW(Source).WriteBOM;
+      TrailingLineBreak := TALStringsW(Source).TrailingLineBreak;
       AddStrings(TALStringsW(Source));
     finally
       EndUpdate;
@@ -4458,6 +4487,7 @@ begin
       LineBreak := TStrings(Source).LineBreak;
       StrictDelimiter := TStrings(Source).StrictDelimiter;
       WriteBOM := TStrings(Source).WriteBOM;
+      TrailingLineBreak := True;
       for I := 0 to Tstrings(Source).Count - 1 do
         AddObject(Tstrings(Source)[I], Tstrings(Source).Objects[I]);
     finally
@@ -4735,6 +4765,7 @@ begin
   Size := 0;
   LB := LineBreak;
   for I := 0 to Count - 1 do Inc(Size, Length(Get(I)) + Length(LB));
+  if (Size > 0) and (not TrailingLineBreak) then dec(Size, Length(LB));
   SetString(Result, nil, Size);
   P := Pointer(Result);
   for I := 0 to Count - 1 do
@@ -4746,11 +4777,14 @@ begin
       ALMove(Pointer(S)^, P^, L*SizeOf(Char));
       Inc(P, L);
     end;
-    L := Length(LB);
-    if L <> 0 then
+    if TrailingLineBreak or (I < Count - 1) then
     begin
-      ALMove(Pointer(LB)^, P^, L*SizeOf(Char));
-      Inc(P, L);
+      L := Length(LB);
+      if L <> 0 then
+      begin
+        ALMove(Pointer(LB)^, P^, L*SizeOf(Char));
+        Inc(P, L);
+      end;
     end;
   end;
 end;
@@ -4916,21 +4950,36 @@ end;
 {*************************************************************************}
 procedure TALStringsW.LoadFromStream(Stream: TStream; Encoding: TEncoding);
 var
-  Size: Integer;
+  Size: Int64;
   Buffer: TBytes;
+  Reader: TStreamReader;
 begin
   BeginUpdate;
   try
     Size := Stream.Size - Stream.Position;
-    SetLength(Buffer, Size);
-    {$IF CompilerVersion >= 30}{Delphi seattle}
-    Stream.ReadBuffer(Buffer, 0, Size);
-    {$else}
-    Stream.Read(Buffer, 0, Size);
-    {$ENDIF}
-    Size := TEncoding.GetBufferEncoding(Buffer, Encoding, FDefaultEncoding);
-    SetEncoding(Encoding); // Keep Encoding in case the stream is saved
-    SetTextStr(Encoding.GetString(Buffer, Size, Length(Buffer) - Size));
+    if (Size >= $15000000) and ALSameTextW(LineBreak, sLineBreak) then
+    begin
+      if Encoding = nil then
+        Encoding := DefaultEncoding;
+      Reader := TStreamReader.Create(Stream, Encoding, True, $FFFF);
+      try
+        Clear;
+        Reader.EndOfStream; // fill buffer and set CurrentEncoding
+        SetEncoding(Reader.CurrentEncoding); // Keep Encoding in case the stream is saved
+        while not Reader.EndOfStream do
+          Add(Reader.ReadLine);
+      finally
+        ALFreeAndNil(Reader);
+      end;
+    end
+    else
+    begin
+      SetLength(Buffer, Size);
+      Stream.Read(Buffer, 0, Size);
+      Size := TEncoding.GetBufferEncoding(Buffer, Encoding, FDefaultEncoding);
+      SetEncoding(Encoding); // Keep Encoding in case the stream is saved
+      SetTextStr(Encoding.GetString(Buffer, Size, Length(Buffer) - Size));
+    end;
   finally
     EndUpdate;
   end;
@@ -5320,7 +5369,7 @@ var
   I: Integer;
   Temp: Array of TObject;
 begin
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
 
   // If the list owns the Objects gather them and free after the list is disposed
@@ -5404,8 +5453,8 @@ end;
 {*******************************}
 procedure TALStringListW.Changed;
 begin
-  if (FUpdateCount = 0) and Assigned(FOnChange) then
-    FOnChange(Self);
+  if (FUpdateCount = 0) and Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 {********************************}
@@ -5619,19 +5668,8 @@ end;
 
 {****************************}
 procedure TALStringListW.Grow;
-{$IF CompilerVersion <= 32}{tokyo}
-var
-  Delta: Integer;
-{$endif}
 begin
-  {$IF CompilerVersion <= 32}{tokyo}
-  if FCapacity > 64 then Delta := FCapacity div 4 else
-    if FCapacity > 8 then Delta := 16 else
-      Delta := 4;
-  SetCapacity(FCapacity + Delta);
-  {$else}
   SetCapacity(GrowCollection(FCapacity, FCount + 1));
-  {$endif}
 end;
 
 {********************************************************}
@@ -6007,7 +6045,7 @@ begin
   FSorted := False;
   FDuplicates := dupIgnore;
   FCaseSensitive := False;
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
   FOwnsObject := OwnsObjects;
   FNameValueOptimization := True;
@@ -6049,7 +6087,7 @@ var
   I: Integer;
   Temp: Array of TObject;
 begin
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
 
   // If the list owns the Objects gather them and free after the list is disposed
@@ -6169,8 +6207,8 @@ end;
 {*********************************}
 procedure TALNVStringListW.Changed;
 begin
-  if (FUpdateCount = 0) and Assigned(FOnChange) then
-    FOnChange(Self);
+  if (FUpdateCount = 0) and Assigned(FOnChanged) then
+    FOnChanged(Self);
 end;
 
 {**********************************}
@@ -6479,19 +6517,8 @@ end;
 
 {******************************}
 procedure TALNVStringListW.Grow;
-{$IF CompilerVersion <= 32}{tokyo}
-var
-  Delta: Integer;
-{$endif}
 begin
-  {$IF CompilerVersion <= 32}{tokyo}
-  if FCapacity > 64 then Delta := FCapacity div 4 else
-    if FCapacity > 8 then Delta := 16 else
-      Delta := 4;
-  SetCapacity(FCapacity + Delta);
-  {$else}
   SetCapacity(GrowCollection(FCapacity, FCount + 1));
-  {$endif}
 end;
 
 {*******************************************}
@@ -6509,6 +6536,7 @@ begin
     if FList[i].fNvs then Inc(Size, Length(FList[i].fName) + 1{length(NameValueSeparator)} +  Length(FList[i].fValue) + Length(LB))
     else Inc(Size, Length(FList[i].fName) + Length(LB))
   end;
+  if (Size > 0) and (not TrailingLineBreak) then dec(Size, Length(LB));
   SetString(Result, nil, Size);
   P := Pointer(Result);
   for I := 0 to FCount - 1 do
@@ -6531,11 +6559,14 @@ begin
         Inc(P, L);
       end;
     end;
-    L := Length(LB);
-    if L <> 0 then
+    if TrailingLineBreak or (I < Count - 1) then
     begin
-      ALMove(Pointer(LB)^, P^, L*SizeOf(Char));
-      Inc(P, L);
+      L := Length(LB);
+      if L <> 0 then
+      begin
+        ALMove(Pointer(LB)^, P^, L*SizeOf(Char));
+        Inc(P, L);
+      end;
     end;
   end;
 end;
@@ -6921,7 +6952,7 @@ begin
   FSorted := False;
   FDuplicates := dupIgnore;
   FCaseSensitive := False;
-  FOnChange := nil;
+  FOnChanged := nil;
   FOnChanging := nil;
   FOwnsObject := OwnsObjects;
 end;
@@ -6971,6 +7002,14 @@ begin
     Name := S;
     Value := '';
   end;
+end;
+
+{******************************************************************}
+function TALNVStringListW.ItemHasNameValue(Index: Integer): Boolean;
+begin
+  if Cardinal(Index) >= Cardinal(FCount) then
+    IndexError(Index, FCount - 1);
+  Result := Flist[Index].FNVS;
 end;
 
 {********************************************************}

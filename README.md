@@ -12,7 +12,7 @@ built with the philosophy that every developer deserves the
 platforms—all while maintaining **independence** from the 
 dominance of GAFA (Google, Apple, Facebook, Amazon). 
 
-**Alcinoe** is fully compatible with **Delphi Athens 12.3**. 
+**Alcinoe** is fully compatible with **Delphi Florence 13.0**. 
 If you find this library helpful, please consider giving it a 
 star on GitHub. It’s free and greatly supports the project’s 
 visibility and growth.
@@ -79,58 +79,52 @@ to the unresolved issues from Embarcadero, we have been
 forced to apply patches to the original Delphi source files:
 
 * [Enhance MouseEvent Handling by Providing Access to MotionEvent (Android) and UIEvent (iOS)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3002)
-* [Project option to define where to look/create the LaunchScreen.TemplateiOS directory](https://quality.embarcadero.com/browse/RSP-33503)
-* [Their is no propagation of mouse event under Firemonkey](https://quality.embarcadero.com/browse/RSP-24397)
-* [Performance Issue - Comparing Equality Between Two Strings](https://quality.embarcadero.com/browse/RSP-42011)
-* [Introduce IsVisibleObject function for improved optimization on TScrollBox](https://quality.embarcadero.com/browse/RSP-42357)
-* [The width and height of a TContext3D object must be defined as single-precision, not as integers](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1723)
-* [TControl.DoRemoveObject should only realign when the removed control is visible](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4001)
-* [Regression in Alexandria: FMX.StrokeBuilder.pas Revamp Leads to TARC Drawing Issues](https://quality.embarcadero.com/browse/RSP-41618)
-* [Multi-Threading for TBitmap, TCanvas, and TContext3D is not working !](https://quality.embarcadero.com/browse/RSP-19673)
-* [Allow linking of Swift compatibility frameworks](https://quality.embarcadero.com/browse/RSP-38700)
-* [Allow TTexture to Define a GL_TEXTURE_EXTERNAL_OES Target](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1550)
-* [Make CanvasHelper of TCanvasGpu public](https://quality.embarcadero.com/browse/RSP-18797)
-* [Allow TTexture to Define a Material (GLSL Shader) to Use](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1549)
-* [TAndroidMotionManager does not handle AMOTION_EVENT_ACTION_CANCEL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3762)
-* [On iOS we need to pass options: PNSDictionary with the message TApplicationEvent.FinishedLaunching](https://quality.embarcadero.com/browse/RSP-40351)
-* [AVPlayerItem miss the function addOutput](https://quality.embarcadero.com/browse/RSP-16853)
-* [CLVisit is missing from the implementation of CLLocationManager](https://quality.embarcadero.com/browse/RSP-18621)
-* [Miss kCIInputImageKey in iOSapi.CoreImage.pas](https://quality.embarcadero.com/browse/RSP-19878)
-* [Effect ProcessTexture is not working and function TFilter.InputTexture: TTexture do unecessary work](https://quality.embarcadero.com/browse/RSP-20825)
-* [TVirtualKeyboardAndroid.GetVirtualKeyboardState not accurate](https://quality.embarcadero.com/browse/RSP-24737)
-* [Add NSPersonNameComponents in iOSapi.Foundation.pas](https://quality.embarcadero.com/browse/RSP-28096)
-* [Comparison of 2 interfaces result in bad behavior in TCommonCustomForm.SetHovered and similar](https://quality.embarcadero.com/browse/RSP-36612)
 * [Improve Rendering Timing by Using Choreographer Instead of Runnable](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2865)
-* [Need JNotificationClass.AUDIO_ATTRIBUTES_DEFAULT and JNotificationChannel.setSound](https://quality.embarcadero.com/browse/RSP-39511)
-* [iOS/OSX: Declaration for CLRegion.initCircularRegionWithCenter is incorrect](https://quality.embarcadero.com/browse/RSP-15717)
-* [Missing Declaration of maximumFramesPerSecond Function in UIScreen Interface](https://quality.embarcadero.com/browse/RSP-43458)
-* [Resolve Circular Reference in JBitmapClass by Refactoring JHardwareBuffer Declaration](https://quality.embarcadero.com/browse/RSP-44100)    
-* [Add Missing drawBitmap functions to JRecordingCanvas Interface](https://quality.embarcadero.com/browse/RSP-44102)
-* [Miss kCIFormatRGBA8 and kCIFormatBGRA8 in iOSapi.CoreImage.pas](https://quality.embarcadero.com/browse/RSP-44130)
-* [Miss UITraitCollection.displayGamut in iOSapi.UIKit.pas](https://quality.embarcadero.com/browse/RSP-44208)
-* [Update Pressed Property Setter in TControl to Enhance State Change Tracking](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1323)
-* [Architectural Issues in FMX.Skia.Canvas.GL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1541)
-* [Missing Declaration of CTFontManagerRegisterGraphicsFont in Macapi.CoreText.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1929)
-* [Request to Add Interfaces and Methods in Macapi.AppKit.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1933)
-* [Missing Functions in Macapi.CoreText.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1934)
-* [Missing &string Method in NSAttributedString Interface in Macapi.Foundation.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1935)
-* [Modify libImageIO Constant in Macapi.ImageIO.pas to Include iOS Support](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1936)
-* [Missing Functions in Macapi.QuartzCore.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1937)
-* [Missing CoreText Constant Functions in iOSapi.CoreText.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1938)
-* [Missing CVMetalTexture and CVMetalTextureCache Declarations in iOSapi.CoreVideo.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1939)
-* [Missing Method Declarations in UITextView and UITextField Interfaces in iOSapi.UIKit.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1941)
-* [Add Additional Notification Icon Sizes for iOS 16+](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2171)
-* [Update TAlignLayout to Include New Alignment Options for Centering Controls](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2342)
-* [Enhance TCustomForm.DoAddObject to Properly Handle FUpdating State for Controls](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2388)
-* [Add the CAFrameRateRange record and preferredFramesPerSecond/preferredFrameRateRange to CADisplayLink](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2424)
-* [Add getEventTimeNanos and getHistoricalEventTimeNanos to JMotionEvent](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2992)
-* [Incorrect indentation of end; in TScreen.IndexFormOfObject](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2902)
-* [ForceQueue with Delay Does Not Work on Android](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3206)
-* [FullScreenManager.showSystemUI Resets SystemUiVisibility](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3207)
+* [Allow TTexture to Define a Material (GLSL Shader) to Use](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1549)
+* [TControl.DoRemoveObject should only realign when the removed control is visible](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4001)
 * [TControl.SetBounds: Missing ParentContentChanged Call on Size-Only Updates](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3264)
+* [Missing ResetUpdatingState call in TCustomForm.DoRemoveObject](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4302)
+* [Effect ProcessTexture is not working and function TFilter.InputTexture: TTexture do unecessary work](https://quality.embarcadero.com/browse/RSP-20825)
+* [TAndroidMotionManager does not handle AMOTION_EVENT_ACTION_CANCEL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3762)
+* [Architectural Issues in FMX.Skia.Canvas.GL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1541)
+* [FMX.VirtualKeyboard.Android: Unused variable and unnecessary logic in Delphi 13 update](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4311)
+* [Project option to define where to look/create the LaunchScreen.TemplateiOS directory](https://quality.embarcadero.com/browse/RSP-33503)
+* [Performance Issue - Comparing Equality Between Two Strings](https://quality.embarcadero.com/browse/RSP-42011)
+* [Allow linking of Swift compatibility frameworks](https://quality.embarcadero.com/browse/RSP-38700)
+* [need to uncomment _GetAUDIO_ATTRIBUTES_DEFAULT from JNotificationClass](https://quality.embarcadero.com/browse/RSP-21296)
+* [Resolve Circular Reference in JBitmapClass by Refactoring JHardwareBuffer Declaration](https://quality.embarcadero.com/browse/RSP-44100)    
+* [Update Pressed Property Setter in TControl to Enhance State Change Tracking](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1323)
+* [Add Additional Notification Icon Sizes for iOS 16+](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2171)
+* [ForceQueue with Delay Does Not Work on Android](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3206)
 * [AndroidManifest merge in Delphi does not respect tools:node="remove" directive for uses-permission](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3867)
 * [Uncomment missing init overloads in JCipher to enable standard Android Crypto API usage](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3921)
-* [Missing kSecValueData constant in iOSapi.Security](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3922)
+* [FMX: TAlignLayout.TopLeft ignores Margins on child control](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4335)
+* [iOS: UNNotificationPresentationOptionNone removed from iOSapi.UserNotifications in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4325)
+* [CVOpenGLESTextureCacheCreate expects raw Obj-C pointer for eaglContext](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4333)
+* [macOS: Align NSTextField.setDelegate signature with other AppKit setters](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4352)
+* [UIViewAutoresizing changed from NSUInteger to NSInteger in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4410)
+* [iOS API regression: UNNotificationAttachment.attachmentWithIdentifier returns Pointer](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4411)
+* [iOS API regression: UNNotificationRequest.requestWithIdentifier returns Pointer](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4412)
+* [iOS: UNNotificationPresentationOptionNone removed from iOSapi.UserNotifications in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4325)
+* [Security.framework: kSec* constants return type inconsistent between macOS (NSString) and iOS (CFStringRef)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4404)
+* [Inconsistent NSUserDefaultsClass.standardUserDefaults return type (macOS = Pointer, iOS = NSUserDefaults)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4389)
+* [Foundation/NSURL: fileURLWithPath: return type inconsistent between macOS and iOS headers](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4402)
+* [NSURL factory methods return types are inconsistent in D13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4401)
+* [Foundation: NSURLCredentialPersistence changed from NSUInteger to NSInteger in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4399)
+* [Foundation: NSKeyValueObservingOptions changed from NSUInteger to NSInteger in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4398)
+* [CoreText: CTParagraphStyleCreate parameter type changed to NativeUInt in D13 — should be NativeInt ](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4397)
+* [CoreText: CTParagraphStyleSpecifier widened from 32-bit to 64-bit in Delphi 13](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4396)
+* [CGImageAlphaInfo mapped to NSInteger in Delphi 13 (was UInt32 in Delphi 12)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4393)
+* [CGBlendMode mapped to NSInteger in Delphi 13 (was UInt32 in Delphi 12)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4392)
+* [CGBitmapInfo mapped to NSInteger in Delphi 13 (was UInt32 in Delphi 12)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4391)
+* [UNUserNotificationCenter.setDelegate changed from UNUserNotificationCenterDelegate to Pointer](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4344)
+* [macOS/iOS: Inconsistent CIFilterClass.filterWithName return type (macOS = Pointer, iOS = CIFilter)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4348)
+* [macOS/iOS: Inconsistent NSNumberClass.numberWithFloat return type (macOS = Pointer, iOS = NSNumber)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4349)
+* [macOS/iOS: Inconsistent CIContextClass.contextWithOptions return type (macOS = Pointer, iOS = CIContext)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4350)
+* [macOS/iOS: Inconsistent CIImageClass.imageWithCGImage return type (macOS = Pointer, iOS = CIImage)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4347)
+* [Missing Functions in Macapi.QuartzCore.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4346)
+* [macOS: Add missing NSTextField APIs (delegate getter/setter + placeholder getters/setter)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4353)
+
 
 Install Alcinoe
 ---------------
@@ -157,7 +151,7 @@ will need to install the BPL. Open Delphi, go to
 Component > Install Packages..., and select the BPL 
 from [Libraries\bpl\Alcinoe](https://github.com/MagicFoundation/Alcinoe/tree/master/Libraries/bpl/Alcinoe). 
 Additionally, include both [Source](https://github.com/MagicFoundation/Alcinoe/tree/master/Source) 
-and all subdirectories from [Embarcadero\Athens](https://github.com/MagicFoundation/Alcinoe/tree/master/Embarcadero/Athens/) 
+and all subdirectories from [Embarcadero\Florence](https://github.com/MagicFoundation/Alcinoe/tree/master/Embarcadero/Florence/) 
 in your search path.
 
 
@@ -557,29 +551,6 @@ to be easily customizable and extendable. On iOS,
 Learn more at [Demos/ALFmxControls](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxControls) 
 <br/>
 <br/>
-
-
-WebRTC Delphi Wrapper
-=====================
-
-WebRTC (Web Real-Time Communications) is a technology that 
-allows web applications and sites to capture and stream 
-audio and/or video media, as well as exchange arbitrary 
-data between browsers and mobile applications without an 
-intermediary. The set of standards behind WebRTC enables 
-peer-to-peer data sharing and teleconferencing without 
-the need for plug-ins or third-party software.
-
-<p align="center">
-  <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/webrtc.jpg?raw=true" alt="Delphi WebRTC wrapper" />
-</p>
-
-With the **TALWebRTC** component, you can easily integrate 
-video and audio chat into your applications, providing users 
-with a more interactive and immersive experience! 
-Learn more at [Demos/ALLiveVideoChat](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALLiveVideoChat)
-<br/>
-<br/>
   
   
 Confetti Falling Animation
@@ -862,6 +833,42 @@ Learn more at [Demos\ALFmxFilterEffects](https://github.com/MagicFoundation/Alci
 <br/>
   
   
+High-Performance HTTP Server (http.sys)
+=======================================
+
+TALHttpSysServer is a high-performance HTTP server component for 
+Delphi that runs directly on top of http.sys, the kernel-mode HTTP 
+stack built into Windows. By leveraging the same foundation that 
+powers IIS, it delivers production-grade performance, scalability, 
+and security without requiring an external web server. With 
+TALHttpSysServer, you can build lightweight yet powerful REST APIs, 
+RPC services, or custom HTTP applications while letting the Windows 
+kernel handle the heavy lifting.
+
+Advantages of using http.sys:
+
+- Kernel-mode HTTP stack → runs directly inside Windows networking core, giving you
+  IIS-level performance, stability, and security without needing a heavyweight web server.
+- Port sharing → multiple apps can listen on the same port with different URL prefixes.
+- I/O Completion Ports → your thread only spends time building the response.
+  Receiving requests and sending responses (even to very slow clients) is
+  handled in the kernel, so your thread never blocks. Concretely, this means
+  a single thread can handle thousands of simultaneous connections.
+- TLS/SSL handled in kernel → you don’t manage OpenSSL/Schannel yourself
+- Modern protocols → supports HTTP/1.1, HTTP/2, and HTTP/3 (QUIC) out of the box.
+- Automatic timeout handling → idle, header, and entity-body timeouts enforced by kernel.
+- Kernel-mode response caching → frequently requested responses can be cached directly
+  in kernel space, bypassing user-mode, which reduces latency and CPU usage.
+- Kernel-managed W3C logging → http.sys writes W3C logs for you and handles
+  file rotation and I/O off the request path, so your app avoids blocking.
+- Quality of Service (QoS) → bandwidth throttling and connection limits built in.
+- Widely tested → same engine IIS uses under the hood
+
+Learn more at [Demos\ALHttpServer](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALHttpServer)
+<br/>
+<br/>
+
+
 Json Parser
 ===========
 
@@ -991,26 +998,6 @@ Learn more at [Source/Alcinoe.MongoDB.Client.pas](https://github.com/MagicFounda
 <br/>
   
 
-WebSocket client
-================
-
-<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/websocket.png?raw=true"  width="540" style="width:540px;"/>
-
-The **WebSocket client** for Delphi is built on top of **WinHTTP** and 
-provides a communication protocol for two-way, interactive communication 
-sessions between a user's browser and a server. This enables sending 
-messages to a server and receiving event-driven responses without the 
-need for constant polling. 
-
-With WebSocket, real-time communication is streamlined, making it ideal 
-for applications that require low-latency, continuous data exchange 
-between the client and server. 
-
-Learn more at [Demos\ALWinHTTPWebSocketClient](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALWinHTTPWebSocketClient)
-<br/>
-<br/>
-  
-
 Fast TStringList
 ================
 
@@ -1031,24 +1018,6 @@ You can start exploring this feature with the demo located at
 [Demos\ALSortedListBenchmark](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALSortedListBenchmark)
 <br/>
 <br/>
-
-
-PHP runner
-==========
-
-**ALPHPRunnerEngine** is a simple yet powerful component that allows 
-you to seamlessly use **PHP** (any version) as a scripting language 
-within Delphi applications. With **ALPHPRunnerEngine**, you can 
-execute PHP scripts directly in your Delphi program without the 
-need for a web server. 
-
-This component leverages the **CGI/FastCGI** interface (using **php-cgi.exe**) 
-to communicate with the PHP engine, making it easy to integrate PHP 
-functionality into Delphi-based projects.
-
-Learn more at [Demos\ALPhpRunner](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALPhpRunner)
-<br/>
-<br/>
   
 
 Memcached Client
@@ -1062,20 +1031,6 @@ caching frequently accessed data in memory, Memcached helps
 improve the performance and scalability of applications.
 
 Learn more at [Source/Alcinoe.MemCached.Client.pas](https://github.com/MagicFoundation/Alcinoe/tree/master/Source/Alcinoe.MemCached.Client.pas)
-<br/>
-<br/>
-  
-
-GSM Component
-=============
-
-The **TAlGSMComm** component enables SMS text messaging 
-using the text-mode interface defined in the **GSM Technical 
-Specification 07.05**. This component allows for easy 
-integration of SMS functionality into your applications, 
-adhering to the standard protocols used in GSM networks.
-
-Learn more at [Source/Alcinoe.GSMComm.pas](https://github.com/MagicFoundation/Alcinoe/tree/master/Source/Alcinoe.GSMComm.pas)
 <br/>
 <br/>
   
@@ -1098,10 +1053,7 @@ Learn more at [Source/Alcinoe.Sqlite3.Client.pas](https://github.com/MagicFounda
 And Much More
 =============
 
-* CGI Runner 
-* Http Client (WinInet/WinHTTP)
-* MySQL Client 
-* NNTP Client
+* HTTP Client (WinHTTP)
 * POP3 Client
 * SMTP Client
 * Xml Parser 
@@ -1150,6 +1102,52 @@ undesired conversions.
 
 History
 =======
+
+
+### 02/10/2025 – Framework Updates
+
+- Archived
+  - `Alcinoe.CGI.pas`
+  - `Alcinoe.ExprEval.pas`
+  - `Alcinoe.FTP.Client.WinINet.pas`
+  - `Alcinoe.FTP.Client.pas`
+  - `Alcinoe.GSMComm.pas`
+  - `Alcinoe.HTTP.Client.WinINet.pas`
+  - `Alcinoe.IsapiHTTP.pas`
+  - `Alcinoe.LibPhoneNumber.pas`
+  - `Alcinoe.MySql.Client.pas`
+  - `Alcinoe.MySql.Wrapper.pas`
+  - `Alcinoe.NNTP.Client.pas`
+  - `Alcinoe.PhpRunner.pas`
+  - `Alcinoe.SphinxQL.Client.pas`
+  - `Alcinoe.WebSocket.Client.WinHTTP.pas`
+  - `Alcinoe.WebSocket.Client.pas`
+  - `Alcinoe.ZLibEx.pas`
+  - `Alcinoe.ZLibExGZ.pas`
+  - `ZLibEx.inc`
+  - `ZLibEx.pas`
+  - `ZLibExApi.pas`
+  - `ZLibExGZ.pas`
+  - `Alcinoe.iOSApi.WebRTC.pas`
+  - `Alcinoe.FMX.WebRTC.pas`
+  - `Alcinoe.AndroidApi.WebRTC.pas`
+  - `Alcinoe.QuickSortList.pas`
+- Renamed
+  - `Alcinoe.Mime.pas` → `Alcinoe.Mime.ContentTypes.pas`  
+  - `Alcinoe.MultiPartParser.pas` → `Alcinoe.Mime.Multipart.pas`  
+  - `Alcinoe.WinApi.Common.pas` → `Alcinoe.WinApi.Windows.pas`  
+  - `ALHTTPEncode` → `ALUrlEncode` and `ALPercentEncode`  
+  - `ALHTTPDecode` → `ALUrlDecode` and `ALPercentDecode`  
+  - `OnChange` → `OnChanged` in `TALStringsA` and `TALStringsW`
+- Added
+  - `TALStringBuilderA` (same as `TStringBuilder` but for `AnsiString`)  
+  - `IncludeTrailingLineBreakInText` property to `TALStringsA` and `TALStringsW`  
+  - `TALHttpSysServer` (an HTTP server built on top of Windows **http.sys**)  
+- Removed
+  - `ALExtractExpressionA`  
+  - `ALExtractHeaderFieldsWithQuoteEscaped` (use `ALExtractHeaderFields` instead)  
+  - `StripParamQuotes` from `ALExtractTagParamsA`  
+  - `TALNewsArticleHeader`   
 
 ### 21/08/2025 – Framework Updates
 

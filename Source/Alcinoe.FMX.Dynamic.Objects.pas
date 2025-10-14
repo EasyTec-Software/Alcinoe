@@ -854,7 +854,7 @@ type
     property Stroke;
     //property TabOrder;
     //property TabStop;
-    //property TouchTargetExpansion;
+    property TouchTargetExpansion;
     property Visible;
     property Width;
     //property OnCanFocus;
@@ -1225,8 +1225,8 @@ uses
   {$IF defined(IOS)}
   iOSapi.CoreGraphics,
   {$ENDIF}
+  Alcinoe.Url,
   Alcinoe.FMX.Styles,
-  Alcinoe.Http.Client,
   Alcinoe.HTTP.Client.Net.Pool,
   Alcinoe.Localization,
   Alcinoe.StringUtils;

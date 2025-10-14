@@ -339,6 +339,16 @@ uses
   Alcinoe.HTML,
   Alcinoe.Common;
 
+{$IFNDEF ALCompilerVersionSupported130}
+  {$MESSAGE WARN 'Check if https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4392 was corrected, if yes delete the type below, and adjust the IFDEF'}
+{$ENDIF}
+type
+  CTParagraphStyleSetting = record
+    spec: UInt32{CTParagraphStyleSpecifier};
+    valueSize: NativeUInt;
+    value: Pointer;
+  end;
+
 const
   ALLineHeightMultipliers: array[10..60] of Single = (
     {10} 1.50, // 15/10
@@ -824,30 +834,31 @@ procedure ALDrawMultiLineText(
               out AImgHeight: Single;
               out AImgTintColor: String); overload;
   begin
-    var LParamList := TALStringListW.Create;
+    var LParamList := TALNVStringListW.Create;
     try
-      ALExtractHeaderFieldsWithQuoteEscaped(
-        [' ', #9, #13, #10]{Separators},
-        [' ', #9, #13, #10]{WhiteSpace},
-        ['"', '''']{Quotes},
-        PChar(ATag){Content},
-        LParamList{Strings},
-        False{HttpDecode},
-        True{StripQuotes});
+      ALExtractHeaderFields(
+        [' ', #9, #13, #10], // const ASeparators: TSysCharSet;
+        [' ', #9, #13, #10], // const AWhiteSpace: TSysCharSet;
+        ['"', ''''], // const AQuoteChars: TSysCharSet;
+        PChar(ATag), // const AContent: PAnsiChar;
+        LParamList, // const AStrings: TALStringsA;
+        True); // const AStripQuotes: Boolean = False;
       //--
       var LStyle := LParamList.Values['style'];
       if LStyle <> '' then begin
-        var LStyleParamList := TALStringListW.Create;
+        var LStyleParamList := TALNVStringListW.Create;
         try
           LStyleParamList.NameValueSeparator := ':';
-          ALExtractHeaderFieldsWithQuoteEscaped(
-            [';']{Separators},
-            [' ', #9, #13, #10]{WhiteSpace},
-            ['"', '''']{Quotes},
-            PChar(LStyle){Content},
-            LStyleParamList{Strings},
-            False{HttpDecode},
-            True{StripQuotes});
+          ALExtractHeaderFields(
+            [';'], // const ASeparators: TSysCharSet;
+            [' ', #9, #13, #10], // const AWhiteSpace: TSysCharSet;
+            ['"', ''''], // const AQuoteChars: TSysCharSet;
+            PChar(LStyle), // const AContent: PAnsiChar;
+            LStyleParamList, // const AStrings: TALStringsA;
+            True, // const AStripQuotes: Boolean = False;
+            False, // const AQuoteDoublingEscape: Boolean = False;
+            #0, // const AEscapeChar: AnsiChar = #0;
+            ':'); // const ANameValueSeparator: AnsiChar = '='
           //--
           var LValue := ALLowerCase(LStyleParamList.Values['width']);
           If ALPosW('px', LValue) > 0 then LStyleParamList.Values['width'] := ALStringReplaceW(LValue, 'px', '', [])
@@ -2317,7 +2328,7 @@ begin
                   // Set decoration kinds
                   // https://api.flutter.dev/flutter/painting/TextStyle/decoration.html
                   // The decorations to paint near the text (e.g., an underline).
-                  {$IFNDEF ALCompilerVersionSupported123}
+                  {$IFNDEF ALCompilerVersionSupported130}
                     {$MESSAGE WARN 'Check if declaration of System.Skia.TSkTextDecoration didn''t changed'}
                   {$ENDIF}
                   sk4d_textstyle_set_decorations(LTextStyle, Byte(LDecorationKind));
@@ -2401,7 +2412,7 @@ begin
 
                   // Add the text or PlaceHolder
                   if LCurrImgSrc <> '' then begin
-                    {$IFNDEF ALCompilerVersionSupported123}
+                    {$IFNDEF ALCompilerVersionSupported130}
                       {$MESSAGE WARN 'Check if declaration of System.Skia.API.sk_placeholderstyle_t didn''t changed'}
                     {$ENDIF}
                     var LPlaceholderStyle: sk_placeholderstyle_t;

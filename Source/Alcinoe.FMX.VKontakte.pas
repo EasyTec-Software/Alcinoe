@@ -126,7 +126,7 @@ procedure ALInitVKontakte(const aAppId: String);
 implementation
 
 uses
-  system.SysUtils,
+  System.SysUtils,
   {$IF defined(android)}
   Androidapi.Helpers,
   Androidapi.JNI.Net,
@@ -139,9 +139,9 @@ uses
   FMX.Helpers.iOS,
   FMX.Platform.iOS,
   Alcinoe.FMX.Common,
-  Alcinoe.iOSapi.UIKit,
   {$ENDIF}
   Alcinoe.StringUtils,
+  Alcinoe.Url,
   Alcinoe.Common;
 
 {*}
@@ -248,7 +248,7 @@ begin
     var LScope := TJVKScope.JavaClass.valueOf(StringToJString(AlUpperCase(LString)));
     LArrayList.add(LScope);
   end;
-  var LCollection := TJCollection.Wrap((LArrayList as ILocalObject).GetObjectID);
+  var LCollection := TJCollection.Wrap(TAndroidHelper.JObjectToID(LArrayList));
   TJVK.JavaClass.login(TAndroidHelper.Activity, LCollection);
 
   {$ENDIF}
@@ -586,10 +586,10 @@ begin
     LIntent.setData(
       StrToJURI(
         'http://vk.com/share.php?'+
-          'url=' + ALHTTPEncode(aLinkUrl)+'&'+    // (string) - URL of the page, the link to which should be published
-          'title=' + ALHTTPEncode(aLinkText)+'&'+ // (string) - the title of the publication. If the parameter is not specified, the title
+          'url=' + ALUrlEncode(aLinkUrl)+'&'+    // (string) - URL of the page, the link to which should be published
+          'title=' + ALUrlEncode(aLinkText)+'&'+ // (string) - the title of the publication. If the parameter is not specified, the title
                                                    //            will be taken from the publication page automatically
-          'image='+ALHTTPEncode(aLinkImageUrl))); // (string) - URL of the image to publish. If the parameter is not specified, the image
+          'image='+ALUrlEncode(aLinkImageUrl))); // (string) - URL of the image to publish. If the parameter is not specified, the image
                                                    //            will be taken from the publication page automatically
           //'&noparse='                            // (boolean) - if true is specified in this parameter , the VKontakte server will not make
                                                    //             an additional request to download the missing information from the published page. If
@@ -609,16 +609,16 @@ begin
     result := True;
     var LURL := StrToNSUrl(
                   'http://vk.com/share.php?'+
-                    'url=' + ALHTTPEncode(aLinkUrl)+'&'+    // (string) - URL of the page, the link to which should be published
-                    'title=' + ALHTTPEncode(aLinkText)+'&'+ // (string) - the title of the publication. If the parameter is not specified, the title
+                    'url=' + ALUrlEncode(aLinkUrl)+'&'+    // (string) - URL of the page, the link to which should be published
+                    'title=' + ALUrlEncode(aLinkText)+'&'+ // (string) - the title of the publication. If the parameter is not specified, the title
                                                              //            will be taken from the publication page automatically
-                    'image='+ALHTTPEncode(aLinkImageUrl));  // (string) - URL of the image to publish. If the parameter is not specified, the image
+                    'image='+ALUrlEncode(aLinkImageUrl));  // (string) - URL of the image to publish. If the parameter is not specified, the image
                                                              //            will be taken from the publication page automatically
                     //'&noparse='                            // (boolean) - if true is specified in this parameter , the VKontakte server will not make
                                                              //             an additional request to download the missing information from the published page. If
                                                              //             false , the request will always be sent.
     if SharedApplication.canOpenURL(LURL) then
-      TALUIApplication.Wrap(NSObjectToID(SharedApplication)).openURLOptionsCompletionHandler(LURL, nil{options}, nil{completionHandler})
+      SharedApplication.openURL(LURL, nil{options}, nil{completionHandler})
     else
       result := false;
 

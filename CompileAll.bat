@@ -40,29 +40,10 @@ echo platforms are correctly added in the SDK Manager.
 echo For detailed setup instructions, visit: 
 echo https://github.com/MagicFoundation/PlatformSDKs
 echo.
+echo Delphi 13 (Florence) will be used as the compiler
 
-echo 1) Athens
-echo 2) Alexandria (deprecated)
-
-set COMPILER=
-set /P COMPILER="Select a compiler (Empty to auto select):" %=%
-more < nul > nul & REM This instruction to clear the ERRORLEVEL because previous instruction set ERRORLEVEL to 1 if empty input
-
-if "%COMPILER%"=="" (
-  set ALDelphiVersion=
-  goto INIT_ENVIRONMENT
-)
-if "%COMPILER%"=="1" (
-  set ALDelphiVersion=23.0
-  goto INIT_ENVIRONMENT
-)
-if "%COMPILER%"=="2" (
-  set ALDelphiVersion=22.0
-  goto INIT_ENVIRONMENT
-)
-echo.
-goto CHOOSE_COMPILER
-
+set ALDelphiVersion=37.0
+goto INIT_ENVIRONMENT
 
 REM ----------------
 REM Init Environment
@@ -281,9 +262,22 @@ SET FileName=%ALBaseDir%\Libraries\bpl\Alcinoe\Win32\%ALDelphiName%
 IF EXIST "%FileName%" rmdir /s /q "%FileName%"
 if exist "%FileName%" goto ERROR
 
+SET FileName=%ALBaseDir%\Libraries\bpl\Alcinoe\Win64\%ALDelphiName%
+IF EXIST "%FileName%" rmdir /s /q "%FileName%"
+if exist "%FileName%" goto ERROR
+
+SET FileName=%ALBaseDir%\Libraries\bpl\Alcinoe\Win64x\%ALDelphiName%
+IF EXIST "%FileName%" rmdir /s /q "%FileName%"
+if exist "%FileName%" goto ERROR
+
 Call :BUILD_PROJECT "%ALBaseDir%\Source\Packages" "" "Alcinoe%ALDelphiName%.dproj" "Win32"
 IF ERRORLEVEL 1 goto ERROR
 
+Call :BUILD_PROJECT "%ALBaseDir%\Source\Packages" "" "Alcinoe%ALDelphiName%.dproj" "Win64"
+IF ERRORLEVEL 1 goto ERROR
+
+Call :BUILD_PROJECT "%ALBaseDir%\Source\Packages" "" "Alcinoe%ALDelphiName%.dproj" "Win64x"
+IF ERRORLEVEL 1 goto ERROR
 
 REM ----------
 REM Build jars 
@@ -359,6 +353,7 @@ Call :BUILD_PROJECT "%ALBaseDir%\Tools\DProjVersioning" "_Source" "DProjVersioni
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\EnvOptionsProjUpdater" "_Source" "EnvOptionsProjUpdater.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\NativeBridgeFileGenerator" "_Build\Source" "NativeBridgeFileGeneratorHelper.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\UnitNormalizer" "_Source" "UnitNormalizer.dproj" "Win64" || GOTO ERROR
+Call :BUILD_PROJECT "%ALBaseDir%\Tools\PlatformApiInterfaceDiff" "_Source" "PlatformApiInterfaceDiff.dproj" "Win64" || GOTO ERROR
 if "%DXVCL%"=="" goto BUILD_DEMOS
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\CodeProfiler" "_Source" "CodeProfiler.dproj" "Win64" || GOTO ERROR
 
@@ -403,11 +398,6 @@ Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALNotificationService" "_Source" "ALNoti
 Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALFmxFilterEffects" "_Source" "ALFmxFilterEffectsDemo.dproj" || PAUSE
 Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALGeoLocationSensor" "_Source" "ALGeoLocationSensorDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALJsonDoc" "_Source" "ALJsonDocDemo.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALLibPhoneNumber" "_Source" "ALLibPhoneNumberDemo.dproj" || PAUSE
-Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALLiveVideoChat\Client" "_Source" "ALLiveVideoChatClient.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALLiveVideoChat\Server" "_Source" "ALLiveVideoChatServer.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALNNTPClient" "_Source" "ALNNTPClientDemo.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALPhpRunner" "_Source" "ALPhpRunnerDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALPOP3Client" "_Source" "ALPOP3ClientDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALRTTI" "_Source" "ALRTTIDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALSMTPClient" "_Source" "ALSMTPClientDemo.dproj" || PAUSE
@@ -415,14 +405,10 @@ Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALSortedListBenchmark" "_Source" "ALSort
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALSqlite3Client" "_Source" "ALSqlite3clientDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALStringBenchmark" "_Source" "ALStringBenchmark.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALXmlDoc" "_Source" "ALXmlDocDemo.dproj" || PAUSE
+Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALHttpServer" "_Source" "ALHttpServerDemo.dproj" || PAUSE
 if "%DXVCL%"=="" goto DEPLOY_TO_APP_STORE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALDatabaseBenchmark" "_Source" "ALDatabaseBenchmark.dproj" || PAUSE
-xcopy "%ALBaseDir%\Libraries\dll\tbbmalloc\win32\tbbmalloc.dll" "%ALBaseDir%\Demos\ALDatabaseBenchmark\Win32\Release" /s >nul 2>&1
-xcopy "%ALBaseDir%\Libraries\dll\tbbmalloc\win64\tbbmalloc.dll" "%ALBaseDir%\Demos\ALDatabaseBenchmark\Win64\Release" /s >nul 2>&1
+Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALStressHTTPServer" "_Source" "ALStressHTTPServer.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALWinHTTPClient" "_Source" "ALWinHTTPClientDemo.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALWinHTTPWebSocketClient" "_Source" "ALWinHTTPWebSocketClientDemo.dproj" || PAUSE
-Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALWinInetHTTPClient" "_Source" "ALWinInetHTTPClientDemo.dproj" || PAUSE
-
 
 REM -----------------------
 REM Deploy to the App Store
