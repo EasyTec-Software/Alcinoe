@@ -23,81 +23,81 @@ uses
 //end;
 
 initialization
- // LIGHTMODE
+  /////////////////////////////////////
+  ///                               ///
+  ///        START LIGHTMODE        ///
+  ///                               ///
+  /////////////////////////////////////
   // Primary
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Primary', $FFF38E0A, False);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimary', $FFFFFFFF, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryContainer', $FFFFDCC1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryContainer', $FF6B3B04, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryContainer', $FFFFE2C1, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryContainer', $FF4B2800, False);
 
-  // Secondary
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Secondary', $FFf38e0a, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondary', $FFFFFFFF, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryContainer', $FFFFDCC1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryContainer', $FF5A422E, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Secondary', $FFFFB149, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondary', $FF302100, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryContainer', $FFFFF2D9, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryContainer', $FF492B00, False);
 
-  // Tertiary
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Tertiary', $FF5B6237, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiary', $FFFFFFFF, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryContainer', $FFDFE7B1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryContainer', $FF434A22, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Tertiary', $FFFFA674, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiary', $FF472111, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryContainer', $FFFFF0E8, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryContainer', $FF652E18, False);
 
-  // Error
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Background', $FFFFFBF7, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnBackground', $FF231A10, False);
+
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Surface', $FFFFFFFF, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSurface', $FF231A10, False);
+
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Error', $FFBA1A1A, False);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnError', $FFFFFFFF, False);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.ErrorContainer', $FFFFDAD6, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnErrorContainer', $FF93000A, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnErrorContainer', $FF410002, False);
 
-  // Surface and variants
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Surface', $FFFFF8F5, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSurface', $FF221A14, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceVariant', $FFF3DFD1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSurfaceVariant', $FF51443B, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerHighest', $FFEFE0D6, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerHigh', $FFF7F7F7, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainer', $FFFBEBE1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerLow', $FFFFF1E8, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerLowest', $FFFFFFFF, False);
-
-  // Inverse, tint, outlines
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InverseSurface', $CC606060, False); //Background Snackbar
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InverseOnSurface', $FFFFFFFF, False); //Text for Snachbar
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceTint', $FF88521C, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Outline', $FF837469, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OutlineVariant', $FFD6C3B6, False);
-
-  // Primary fixed/inverse
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryFixed', $FFFFDCC1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryFixed', $FF2E1500, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryFixedDim', $FFFFB779, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryFixedVariant', $FF6B3B04, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InversePrimary', $FFFFB779, False);
-
-  // Secondary fixed
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryFixed', $FFFFDCC1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryFixed', $FF2A1707, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryFixedDim', $FFE3C0A5, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryFixedVariant', $FF5A422E, False);
-
-  // Tertiary fixed
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryFixed', $FFDFE7B1, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryFixed', $FF181E00, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryFixedDim', $FFC3CB97, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryFixedVariant', $FF434A22, False);
-
-  // Background (legacy role in M3; kept commented as in your original file)
-  // TALStylemanager.Instance.AddOrSetColor('Material3.Color.Background', $FFFFF8F5, False);
-  // TALStylemanager.Instance.AddOrSetColor('Material3.Color.OnBackground', $FF221A14, False);
-
-  // Additional surfaces and elevation colors
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceBright', $FFFFF8F5, False);
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceDim', $FFE6D7CD, False);
-
-  // Scrim and shadow
-  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Scrim', $FF000000, False);
+  // Missing common M3 color roles (use placeholders below, replace values with your scheme as needed)
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceTint', $FFF38E0A, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceVariant', $FFE3C7A0, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSurfaceVariant', $FF4B2800, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Outline', $FF795548, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OutlineVariant', $FFD7C2B0, False);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Shadow', $FF000000, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.Scrim', $FF000000, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InverseSurface', $FFDED5C3, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InverseOnSurface', $FF231A10, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.InversePrimary', $FFF38E0A, False);
 
-  // DARKMODE
+  // Fixed/Dim/Bright roles often used for accessibility or dynamics, fill in or update accordingly
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryFixed', $FFFFE2C1, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryFixed', $FF4B2800, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.PrimaryFixedDim', $FFF38E0A, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimaryFixedVariant', $FF4B2800, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryFixed', $FFFFF2D9, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryFixed', $FF492B00, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SecondaryFixedDim', $FFFFB149, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnSecondaryFixedVariant', $FF302100, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryFixed', $FFFFF0E8, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryFixed', $FF652E18, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.TertiaryFixedDim', $FFFFA674, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnTertiaryFixedVariant', $FF472111, False);
+
+  // Filled surface containers at various elevations, typical to M3
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceDim', $FFE2C1B9, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceBright', $FFFFFBF7, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerLowest', $FFFFFFFF, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerLow', $FFD7C2B0, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainer', $FFFFE2C1, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerHigh', $FFFFF2D9, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerHighest', $FFFFF0E8, False);
+  TALStyleManager.Instance.AddOrSetColor('Material3.Color.SurfaceContainerHighest', $FFFFF0E8, False);
+
+
+  /////////////////////////////////////
+  ///                               ///
+  ///          START DARKMODE       ///
+  ///                               ///
+  /////////////////////////////////////
+
   // Primary
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Primary', $FFFFB779, true);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.OnPrimary', $FF4C2700, true);
@@ -170,5 +170,5 @@ initialization
   // Scrim und Shadow
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Scrim', $FF000000, true);
   TALStyleManager.Instance.AddOrSetColor('Material3.Color.Shadow', $FF000000, true);
-
+  TALStyleManager.Instance.RefreshColors;
 end.
