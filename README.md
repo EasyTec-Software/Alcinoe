@@ -20,6 +20,20 @@ visibility and growth.
 <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/star.jpg?raw=true" />
 
 
+Fuel the Magic, Inspire Innovation
+----------------------------------
+
+By joining MagicFoundation as an Associate, you'll enter a 
+community that's actively shaping the future of Alcinoe—while 
+unlocking a suite of exclusive perks. Associates receive priority 
+support for bugs they submit via the issue tracker or by email, 
+including faster triage, dedicated investigation, and ongoing 
+updates until resolved.
+
+<a href="https://github.com/sponsors/MagicFoundation">
+  <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/becomeasponsor.webp?raw=true" width="800" />
+</a>
+
 Example of an App Built with Alcinoe
 ------------------------------------
 
@@ -89,6 +103,7 @@ forced to apply patches to the original Delphi source files:
 * [Architectural Issues in FMX.Skia.Canvas.GL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1541)
 * [FMX.VirtualKeyboard.Android: Unused variable and unnecessary logic in Delphi 13 update](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4311)
 * [Project option to define where to look/create the LaunchScreen.TemplateiOS directory](https://quality.embarcadero.com/browse/RSP-33503)
+* [Replace Pointer-based signatures in iOS/macOS bridges with strongly typed wrappers](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4433)
 * [Performance Issue - Comparing Equality Between Two Strings](https://quality.embarcadero.com/browse/RSP-42011)
 * [Allow linking of Swift compatibility frameworks](https://quality.embarcadero.com/browse/RSP-38700)
 * [need to uncomment _GetAUDIO_ATTRIBUTES_DEFAULT from JNotificationClass](https://quality.embarcadero.com/browse/RSP-21296)
@@ -551,7 +566,28 @@ to be easily customizable and extendable. On iOS,
 Learn more at [Demos/ALFmxControls](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxControls) 
 <br/>
 <br/>
-  
+
+
+TALMediaPicker — Unified Media Picker
+=====================================
+
+**TALMediaPicker** provides a unified, high-level API to select 
+images and videos from the device library or capture new media 
+with the camera across iOS and Android. It abstracts 
+platform specifics (iOS PHPickerViewController/UIImagePickerController, 
+Android ACTION_PICK_IMAGES/GET_CONTENT and camera intents), 
+handles permission flows, and normalizes 
+results into TMediaItem objects with URIs and media types. 
+The component supports multiple selection, returns streams on 
+demand (ExtractStream), and exposes clear callbacks for success, 
+cancel, and error states—letting you integrate media workflows 
+quickly without dealing with per-platform quirks like 
+FileProvider URIs, picker filters, or temporary file management.
+Learn more at [Demos/ALFmxMediaPicker](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxMediaPicker)
+
+<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/mediapicker.png?raw=true" alt="mediapicker" />
+<br/>
+
   
 Confetti Falling Animation
 ==========================
@@ -565,7 +601,7 @@ color, ensuring seamless integration into any project.
 Whether it's for celebrations, notifications, or 
 dynamic visual effects, **ALConfetti** delivers a 
 smooth, high-performance animation experience. 
-Learn more at [Demos/ALConfetti](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALConfetti)
+Learn more at [Demos/ALFmxConfetti](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxConfetti)
 
 <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/confetti.gif?raw=true" alt="confetti" width="564" style="width:564px;" />
 <br/>
@@ -683,7 +719,7 @@ far beyond the traditional ease-in or ease-out sequences.
 </p>
 
 Learn more at 
-[Demos/ALAnimation](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALAnimation)
+[Demos/ALFmxAnimation](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxAnimation)
 <br/>
 <br/>
 
@@ -709,7 +745,7 @@ This version improves the flow and clarity of the description
 while keeping the markdown formatting
 
 Learn more at 
-[Demos/ALAnimation](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALAnimation)
+[Demos/ALFmxAnimation](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxAnimation)
 
 <br clear="left"/>
 <br/>
@@ -756,7 +792,7 @@ to mobile users, improving engagement and communication within
 their apps.
 
 Learn more at 
-[Demos\ALNotificationService](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALNotificationService)
+[Demos\ALFmxNotificationService](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxNotificationService)
 <br/>
 <br/>
 
@@ -781,7 +817,7 @@ developers can seamlessly integrate location-based functionality
 into their apps without needing to manage the underlying 
 implementation details.
 
-Learn more at [Demos\ALGeoLocationSensor](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALGeoLocationSensor)
+Learn more at [Demos\ALFmxGeoLocationSensor](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxGeoLocationSensor)
 <br/>
 <br/>
   
@@ -811,7 +847,7 @@ Once logged in, users can grant permissions to your app, enabling you
 to retrieve information or perform actions on VKontakte/Facebook 
 on their behalf.
 
-Learn more at [Demos\ALFacebookLogin](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFacebookLogin)
+Learn more at [Demos\ALFmxFacebookLogin](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxFacebookLogin)
 <br/>
 <br/>
 
@@ -1103,6 +1139,15 @@ undesired conversions.
 History
 =======
 
+### 24/10/2025 – New Components & Enhancements  
+
+- **TALMediaPicker**: New cross-platform component to select
+  images/videos or capture media from the camera.  
+- **TALVideoPlayer**: Added `RotateAccordingToMetadataOrientation` 
+  property to automatically adjust playback orientation.  
+- **TALImage**: Added `ResourceStream` property to load 
+  images directly from a stream.
+  
 
 ### 02/10/2025 – Framework Updates
 
