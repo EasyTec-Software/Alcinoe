@@ -624,7 +624,7 @@ type
     FIsFirstFrame: Boolean; // 1 Byte
     FAutoStartMode: TAutoStartMode; // 1 Byte
     FWrapMode: TALImageWrapMode; // 1 byte
-    FRotateAccordingToMetadataOrientation: Boolean; // 1 bytes
+    FApplyMetadataOrientation: Boolean; // 1 bytes
     FCacheIndex: Integer; // 4 bytes
     FCacheEngine: TALBufDrawableCacheEngine; // 8 bytes
     FPreviewDownloadContext: TPreviewDownloadContext; // [MultiThread] | 8 bytes
@@ -635,7 +635,7 @@ type
     procedure setPreviewResourceName(const Value: String);
     procedure SetDataSource(const Value: String);
     procedure SetWrapMode(const Value: TALImageWrapMode);
-    procedure SetRotateAccordingToMetadataOrientation(const Value: Boolean);
+    procedure SetApplyMetadataOrientation(const Value: Boolean);
     function GetState: Integer;
     procedure SetAutoStartMode(const Value: TAutoStartMode);
     function GetIsPlaying: boolean;
@@ -771,7 +771,7 @@ type
     // In debug mode, the image is loaded from a file located in the /Resources/ sub-folder of the
     // project directory (with the extensions .png or .jpg).
     property PreviewResourceName: String read fPreviewResourceName write setPreviewResourceName;
-    property RotateAccordingToMetadataOrientation: Boolean read FRotateAccordingToMetadataOrientation write SetRotateAccordingToMetadataOrientation default false;
+    property ApplyMetadataOrientation: Boolean read FApplyMetadataOrientation write SetApplyMetadataOrientation default false;
     property RotationAngle;
     //property RotationCenter;
     property Pivot;
@@ -1477,7 +1477,9 @@ begin
 
     // The clockwise rotation that should be applied to the video for it to be rendered in the correct
     // orientation, or 0 if unknown or not applicable. Only 0, 90, 180 and 270 are supported.
-    fVideoPlayerEngine.FVideoRotationDegrees := fVideoPlayerEngine.fExoPlayer.getVideoFormat.rotationDegrees;
+    var LVideoFormat := fVideoPlayerEngine.fExoPlayer.getVideoFormat;
+    if LVideoFormat = nil then fVideoPlayerEngine.FVideoRotationDegrees := 0
+    else fVideoPlayerEngine.FVideoRotationDegrees := LVideoFormat.rotationDegrees;
     if (fVideoPlayerEngine.FVideoRotationDegrees = 90) or
        (fVideoPlayerEngine.FVideoRotationDegrees = 270) then begin
       fVideoPlayerEngine.FVideoWidth := videoSize.height;
@@ -3728,7 +3730,7 @@ begin
   FIsFirstFrame := true;
   FAutoStartMode := TAutoStartMode.None;
   FWrapMode := TALImageWrapMode.Fit;
-  FRotateAccordingToMetadataOrientation := False;
+  FApplyMetadataOrientation := False;
   FCacheIndex := 0;
   FCacheEngine := nil;
   FPreviewDownloadContext := nil;
@@ -3895,12 +3897,12 @@ begin
   end;
 end;
 
-{********************************************************************************************}
-procedure TALVideoPlayerSurface.SetRotateAccordingToMetadataOrientation(const Value: Boolean);
+{********************************************************************************}
+procedure TALVideoPlayerSurface.SetApplyMetadataOrientation(const Value: Boolean);
 begin
-  if FRotateAccordingToMetadataOrientation <> Value then begin
+  if FApplyMetadataOrientation <> Value then begin
     ClearBufDrawable;
-    FRotateAccordingToMetadataOrientation := Value;
+    FApplyMetadataOrientation := Value;
     Repaint;
   end;
 end;
@@ -4397,6 +4399,7 @@ begin
                         '', // AMaskResourceName, // const AMaskResourceName: String;
                         AScale, // const AScale: Single;
                         ARect.Width, ARect.Height, // const W, H: single;
+                        False, // const AApplyExifOrientation: Boolean;
                         AWrapMode, // const AWrapMode: TALImageWrapMode;
                         TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                         TalphaColors.Null, // const ATintColor: TalphaColor;
@@ -4692,7 +4695,7 @@ begin
 
     var LVideoRotationDegrees := fVideoPlayerEngine.GetVideoRotationDegrees;
     var LLocalRect: TRectF;
-    if (FRotateAccordingToMetadataOrientation) and
+    if (FApplyMetadataOrientation) and
        ((LVideoRotationDegrees = 90) or
         (LVideoRotationDegrees = 270)) then LLocalRect := TRectF.Create(0, 0, Height, Width).CenterAt(LocalRect)
     else LLocalRect := TRectF.Create(0, 0, Width, Height);
@@ -4731,7 +4734,7 @@ begin
         Raise Exception.Create('Error B0DE069F-2CFD-4719-9130-0D69A647EE2D')
     end;
 
-    if FRotateAccordingToMetadataOrientation then begin
+    if FApplyMetadataOrientation then begin
       if (LVideoRotationDegrees = 180) then begin
         var LMatrixRotationCenter: TpointF;
         LMatrixRotationCenter.X := (width / 2) + Canvas.Matrix.m31;

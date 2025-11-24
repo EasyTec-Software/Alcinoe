@@ -351,6 +351,7 @@ Call :BUILD_PROJECT "%ALBaseDir%\Tools\DeployProjNormalizer" "_Source" "DeployPr
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\DProjNormalizer" "_Source" "DProjNormalizer.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\DProjVersioning" "_Source" "DProjVersioning.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\EnvOptionsProjUpdater" "_Source" "EnvOptionsProjUpdater.dproj" "Win64" || GOTO ERROR
+Call :BUILD_PROJECT "%ALBaseDir%\Tools\ImageMagickWrapperGenerator" "_Source" "ImageMagickWrapperGenerator.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\NativeBridgeFileGenerator" "_Build\Source" "NativeBridgeFileGeneratorHelper.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\UnitNormalizer" "_Source" "UnitNormalizer.dproj" "Win64" || GOTO ERROR
 Call :BUILD_PROJECT "%ALBaseDir%\Tools\PlatformApiInterfaceDiff" "_Source" "PlatformApiInterfaceDiff.dproj" "Win64" || GOTO ERROR
@@ -399,6 +400,7 @@ Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALFmxMediaPicker" "_Source" "ALFmxMediaP
 Call :BUILD_FMX_DEMO "%ALBaseDir%\Demos\ALFmxNotificationService" "_Source" "ALFmxNotificationServiceDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALCipher" "_Source" "ALCipherDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALHttpServer" "_Source" "ALHttpServerDemo.dproj" || PAUSE
+Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALImageMagick" "_Source" "ALImageMagickDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALJsonDoc" "_Source" "ALJsonDocDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALPOP3Client" "_Source" "ALPOP3ClientDemo.dproj" || PAUSE
 Call :BUILD_VCL_DEMO "%ALBaseDir%\Demos\ALRTTI" "_Source" "ALRTTIDemo.dproj" || PAUSE

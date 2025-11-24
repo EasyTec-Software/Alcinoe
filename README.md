@@ -92,6 +92,7 @@ Please request the resolution of these quality reports. Due
 to the unresolved issues from Embarcadero, we have been 
 forced to apply patches to the original Delphi source files:
 
+* [FMX Android: Zoom gesture (TInteractiveGesture.Zoom) only fires on very fast pinches](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4509)
 * [Enhance MouseEvent Handling by Providing Access to MotionEvent (Android) and UIEvent (iOS)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3002)
 * [Improve Rendering Timing by Using Choreographer Instead of Runnable](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2865)
 * [Allow TTexture to Define a Material (GLSL Shader) to Use](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1549)
@@ -976,30 +977,30 @@ Example :
 
 ```
     //Create the ImageMagick Library
-    ALCreateImageMagickLibrary({alcinoe} + '\Libraries\dll\imagemagick\win32\imagemagick', min(2, System.CPUCount){aThreadLimit});
+    ALCreateImageMagickLibrary({alcinoe} + '\Libraries\dll\imagemagick\win32\imagemagick');
     try
     
       //create the wand pointer
-      var LWand := ALImageMagickLib.NewMagickWand;
+      var LWand := NewMagickWand;
       try
     
         //load the image
-        if ALImageMagickLib.MagickReadImage(LWand, pansiChar(aInputFilename)) <> MagickTrue then RaiseLastMagickWandError(LWand);
+        if MagickReadImage(LWand, pansiChar(aInputFilename)) <> MagickTrue then RaiseLastMagickWandError(LWand);
         
         //Set the compression quality
-        if ALImageMagickLib.MagickSetImageCompressionQuality(LWand,80) <> MagickTrue then RaiseLastMagickWandError(LWand);
+        if MagickSetImageCompressionQuality(LWand,80) <> MagickTrue then RaiseLastMagickWandError(LWand);
     
         //autorate the image
-        if ALImageMagickLib.MagickAutoOrientImage(LWand) <> MagickTrue then RaiseLastMagickWandError(LWand);
+        if MagickAutoOrientImage(LWand) <> MagickTrue then RaiseLastMagickWandError(LWand);
     
         //Resize the image using the Lanczos filter
-        if ALImageMagickLib.MagickResizeImage(LWand, 640, 480, LanczosFilter) <> MagickTrue then RaiseLastMagickWandError(LWand);
+        if MagickResizeImage(LWand, 640, 480, LanczosFilter) <> MagickTrue then RaiseLastMagickWandError(LWand);
            
         //save the image
-        ALImageMagickLib.MagickWriteImage(LWand, pansiChar(aOutputFilename));
+        MagickWriteImage(LWand, pansiChar(aOutputFilename));
     
       finally
-        ALImageMagickLib.DestroyMagickWand(LWand);
+        DestroyMagickWand(LWand);
       end;
   
     finally
@@ -1008,7 +1009,7 @@ Example :
 
 ```
 
-Learn more at [Source/Alcinoe.ImageMagick.pas](https://github.com/MagicFoundation/Alcinoe/tree/master/Source/Alcinoe.ImageMagick.pas)
+Learn more at [Demos\ALImageMagick](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALImageMagick)
 <br/>
 <br/>
 
@@ -1138,6 +1139,39 @@ undesired conversions.
 
 History
 =======
+
+### 14/11/2025 – Full ImageMagick Wrapper Integration
+
+- Added the complete ImageMagick wrapper, including all functions 
+  and types from MagickCore and MagickWand. This wrapper was 
+  generated automagically using the ImageMagickWrapperGenerator 
+  project.
+
+### 09/11/2025 – Framework Improvements
+
+- Renamed `RotateAccordingToMetadataOrientation` → `ApplyMetadataOrientation`
+- Renamed `RotateAccordingToExifOrientation` → `ApplyExifOrientation`
+- Added `GetSingle`, `GetDouble`, and `GetDateTime` to `TALUserPreferences`
+- `TALBrush` now includes:
+  - `ResourceStream`
+  - `OwnsResourceStream`
+  - `ApplyExifOrientation`
+- `TALImage`:
+  - Now supports `HTTPHeaders` when downloading from a URL
+  - Added `OwnsResourceStream`
+- Renamed `TalExifOrientationInfo` → `TalExifOrientation`
+- Renamed `AlGetExifOrientationInfo` → `AlGetExifOrientation`
+- Added `AApplyExifOrientation` parameter to:
+  - `ALCreateSkSurfaceFromResource`
+  - `ALCreateSkImageFromResource`
+  - `ALCreateJBitmapFromResource`
+  - `ALCreateCGContextRefFromResource`
+  - `ALCreateCGImageRefFromResource`
+  - `ALCreateTBitmapFromResource`
+  - `ALCreateBitmapFromResource`
+  - `ALCreateDrawableFromResource`
+- Updated `TALDialog`, `TALLoadingOverlay`, and `TALSheet` to emulate overlays over system bars (via system bar color adjustments)
+- Added `ALGetSystemBarsColor` and `ALSetSystemBarsColor`
 
 ### 24/10/2025 – New Components & Enhancements  
 
