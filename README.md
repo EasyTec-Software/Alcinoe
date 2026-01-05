@@ -92,6 +92,7 @@ Please request the resolution of these quality reports. Due
 to the unresolved issues from Embarcadero, we have been 
 forced to apply patches to the original Delphi source files:
 
+* [iOS: Missing application:handleEventsForBackgroundURLSession:completionHandler: delegate in FMX](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4669)
 * [FMX Android: Zoom gesture (TInteractiveGesture.Zoom) only fires on very fast pinches](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4509)
 * [Enhance MouseEvent Handling by Providing Access to MotionEvent (Android) and UIEvent (iOS)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3002)
 * [Improve Rendering Timing by Using Choreographer Instead of Runnable](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-2865)
@@ -101,6 +102,7 @@ forced to apply patches to the original Delphi source files:
 * [Missing ResetUpdatingState call in TCustomForm.DoRemoveObject](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4302)
 * [Effect ProcessTexture is not working and function TFilter.InputTexture: TTexture do unecessary work](https://quality.embarcadero.com/browse/RSP-20825)
 * [TAndroidMotionManager does not handle AMOTION_EVENT_ACTION_CANCEL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-3762)
+* [Add ExtractContentStream to TURLResponse / IURLResponse to allow taking ownership without copying.](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4664)
 * [Architectural Issues in FMX.Skia.Canvas.GL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1541)
 * [FMX.VirtualKeyboard.Android: Unused variable and unnecessary logic in Delphi 13 update](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4311)
 * [Project option to define where to look/create the LaunchScreen.TemplateiOS directory](https://quality.embarcadero.com/browse/RSP-33503)
@@ -140,6 +142,7 @@ forced to apply patches to the original Delphi source files:
 * [macOS/iOS: Inconsistent CIImageClass.imageWithCGImage return type (macOS = Pointer, iOS = CIImage)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4347)
 * [Missing Functions in Macapi.QuartzCore.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4346)
 * [macOS: Add missing NSTextField APIs (delegate getter/setter + placeholder getters/setter)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4353)
+* [iOS vs macOS mismatch in CGImageDestinationFinalize declaration (Boolean vs Integer return type)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4714)
 
 
 Install Alcinoe
@@ -589,6 +592,29 @@ Learn more at [Demos/ALFmxMediaPicker](https://github.com/MagicFoundation/Alcino
 <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/mediapicker.png?raw=true" alt="mediapicker" />
 <br/>
 
+  
+ALHttpWorker - Upload and download data reliably in the background — even when the app is killed
+================================================================================================
+
+<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/backgroundhttptransfer.png?raw=true"/>
+  
+Imagine you're building a chat app: when the user taps **Send**, 
+you could send the message on the **main thread**, but this freezes 
+the UI and is forbidden by mobile operating systems. Another option 
+is a **background thread**, however this fails when the user switches 
+apps (incoming phone call, home button, etc.), since iOS and Android 
+suspend or kill HTTP networking in background mode. You also have to 
+deal with unreliable mobile connectivity (temporary loss of Wi-Fi / 
+4G / 5G) and manually manage retries and server unavailability.
+
+**TALHttpWorker** solves all these problems. Simply enqueue the 
+upload using **`TALHttpWorker.enqueue`**, and you no longer need 
+to worry about network reliability, app switching, app termination, 
+or temporary server errors (`HTTP 5xx`, unreachable host, etc.). 
+**TALHttpWorker** handles everything automatically and posts a 
+**`TWorkResultMessage`** when the job is completed.
+<br/>
+  
   
 Confetti Falling Animation
 ==========================
@@ -1139,6 +1165,59 @@ undesired conversions.
 
 History
 =======
+
+## 24/12/2025 – Versioning Alignment, API Additions & Behavior Updates
+
+- Align **Alcinoe** versioning with the Delphi compiler version (e.g. Alcinoe built 
+  with Delphi 13.0 now uses version `13.0.x`).
+- Added `HttpWorker.Cancel` method.
+- Added `ToString` helpers for `TRectF`, `TSizeF`, `TPointF`, `TALRectD`, `TALSizeD`, 
+  and `TALPointD`.
+- Added unified path helper functions:
+  - `ALGetAppDataPathW`
+  - `ALGetTempPathW`
+  - `ALGetTempFilenameW`
+  - `ALGetCachePathW`
+- Added `ResourceStream` property to `TALAnimatedImage`.
+- Added `PrependItem`, `AppendItem`, and `DeleteItem` methods to `TALDynamicListBox`.
+- Removed `AddItem` from `TALDynamicListBox` (use `PrependItem` or `AppendItem` instead).
+- `TALEdit` controls are now automatically frozen (using a screenshot for rendering) 
+  when partially visible, improving Z-order simulation.
+- `TALMemo` and `TALEdit` now use `ALResolveLineHeightMultiplier`, ensuring the same 
+  line-height algorithm as `TALText`.
+- Updated `TALNotificationService` to use `TMessage`-based notifications:
+  - `TNotificationReceivedMessage`
+  - `TGetTokenMessage`
+  - `TDeleteTokenMessage`
+  - `TTokenRefreshMessage`
+  - `TNotificationPermissionResultMessage`
+  This replaces event-based callbacks (`OnNotificationReceived`, `OnGetToken`, etc.) and 
+  better aligns with the singleton design.
+- Added an internal `ScrollBox` to `TALBottomSheet` to support content larger than the 
+  maximum visible area.
+- Added `IsAncestorOf` method to `TControl`.
+
+### 25/11/2025 – TALHttpWorker Added
+
+- Added `TALHttpWorker` component to support background upload/download operations
+- Refactoring of HTTP-related types to explicitly separate ANSI (A) 
+  and Unicode (W) variants:
+  - `TALHttpServerRequest` → `TALHttpServerRequestA`
+  - `TALHttpServerResponse` → `TALHttpServerResponseA`
+  - `TALHttpServer` → `TALHttpServerA`
+  - `TALHTTPCookie` → `TALHTTPCookieA` and `TALHTTPCookieW`
+  - `TALHTTPRequestHeaders` → `TALHTTPRequestHeadersA` and `TALHTTPRequestHeadersW`
+  - `TALHTTPResponseHeaders` → `TALHTTPResponseHeadersA` and `TALHTTPResponseHeadersW`
+  - `TALHTTPRequest` → `TALHTTPRequestA` and `TALHTTPRequestW`
+  - `TALHTTPResponse` → `TALHTTPResponseA` and `TALHTTPResponseW`
+  - `AlRfc822DayOfWeekNames` → `AlRfc822DayOfWeekNamesA` and `AlRfc822DayOfWeekNamesW`
+  - `ALRfc822MonthOfTheYearNames` → `ALRfc822MonthOfTheYearNamesA` and `ALRfc822MonthOfTheYearNamesW`
+- `TALUserPreferences` now saves its settings in the file `{PackageName}.user_preferences`
+
+### 16/11/2025 – Framework Improvements
+
+- Renamed TALImage.ApplyExifOrientation to TALImage.ApplyMetadataOrientation
+  for consistency with TALVideoPlayer.ApplyMetadataOrientation.
 
 ### 14/11/2025 – Full ImageMagick Wrapper Integration
 

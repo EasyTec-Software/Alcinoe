@@ -93,7 +93,7 @@ type
         MaskResourceName: String;
         WrapMode: TALImageWrapMode;
         CropCenter: TpointF;
-        ApplyExifOrientation: Boolean;
+        ApplyMetadataOrientation: Boolean;
         StrokeColor: TAlphaColor;
         StrokeThickness: Single;
         ShadowBlur: Single;
@@ -122,7 +122,7 @@ type
     FMaskResourceName: String; // 8 bytes
     FHTTPHeaders: TNetHeaders; // 8 bytes
     FWrapMode: TALImageWrapMode; // 1 bytes
-    FApplyExifOrientation: Boolean; // 1 bytes
+    FApplyMetadataOrientation: Boolean; // 1 bytes
     FCorners: TCorners; // 1 bytes
     FSides: TSides; // 1 bytes
     FXRadius: Single; // 4 bytes
@@ -144,7 +144,7 @@ type
     function GetShadow: TALShadow;
     procedure SetShadow(const Value: TALShadow);
     procedure SetWrapMode(const Value: TALImageWrapMode);
-    procedure SetApplyExifOrientation(const Value: Boolean);
+    procedure SetApplyMetadataOrientation(const Value: Boolean);
     procedure setResourceName(const Value: String);
     procedure setResourceStream(const Value: TStream);
     procedure setMaskResourceName(const Value: String);
@@ -203,7 +203,7 @@ type
     procedure CancelResourceDownload;
     class function CanStartResourceDownload(var AContext: Tobject): boolean; virtual; // [MultiThread]
     class procedure HandleResourceDownloadSuccess(const AResponse: IHTTPResponse; var AContentStream: TMemoryStream; var AContext: TObject); virtual; // [MultiThread]
-    class procedure HandleResourceDownloadError(const AErrMessage: string; var AContext: Tobject); virtual; // [MultiThread]
+    class procedure HandleResourceDownloadError(const AResponse: IHTTPResponse; const AErrMessage: string; var AContext: Tobject); virtual; // [MultiThread]
     class function GetResourceDownloadPriority(const AContext: Tobject): Int64; virtual; // [MultiThread]
     class Procedure CreateBufDrawable(var AContext: TObject); overload; virtual; // [MultiThread]
     class Procedure CreateBufDrawable(
@@ -219,7 +219,7 @@ type
                       const AMaskResourceName: String;
                       const AWrapMode: TALImageWrapMode;
                       const ACropCenter: TpointF;
-                      const AApplyExifOrientation: Boolean;
+                      const AApplyMetadataOrientation: Boolean;
                       const AStrokeColor: TAlphaColor;
                       const AStrokeThickness: Single;
                       const AShadowBlur: Single;
@@ -337,7 +337,7 @@ type
     ///   (the Delphi IDE uses a Skia canvas), so the property is effectively
     ///   ignored there and images are displayed with EXIF orientation applied.
     /// </remarks>
-    property ApplyExifOrientation: Boolean read FApplyExifOrientation write SetApplyExifOrientation default false;
+    property ApplyMetadataOrientation: Boolean read FApplyMetadataOrientation write SetApplyMetadataOrientation default false;
     property RotationAngle;
     //property RotationCenter;
     property Pivot;
@@ -429,7 +429,7 @@ type
         property StopProgress: Single read FStopProgress write SetStopProgress stored IsStopProgressStored nodefault;
       end;
   private
-    fAnimation: TAnimation;
+    fAnimation: TAnimation; // 8 bytes
     {$IF defined(ALSkiaAvailable)}
       fSkottieAnimation: sk_skottieanimation_t;
       fAnimcodecplayer: sk_animcodecplayer_t;
@@ -445,14 +445,17 @@ type
       {$ENDIF}
     {$ENDIF}
     FResourceName: String; // 8 bytes
+    FResourceStream: TStream; // 8 bytes
     FTintColor: TAlphaColor; // 4 bytes
     FTintColorKey: String; // 8 bytes
     FWrapMode: TALImageWrapMode; // 1 byte
+    FOwnsResourceStream: Boolean; // 1 byte
     FOnAnimationFirstFrame: TNotifyEvent; // 16 bytes
     FOnAnimationProcess: TNotifyEvent; // 16 bytes
     FOnAnimationFinish: TNotifyEvent; // 16 bytes
     procedure SetWrapMode(const Value: TALImageWrapMode);
     procedure setResourceName(const Value: String);
+    procedure setResourceStream(const Value: TStream);
     procedure SetAnimation(const Value: TAnimation);
     procedure SetTintColor(const Value: TAlphaColor);
     procedure setTintColorKey(const Value: String);
@@ -474,6 +477,11 @@ type
     procedure ReleaseCodec; virtual;
     property DefaultTintColor: TAlphaColor read GetDefaultTintColor;
     property DefaultTintColorKey: String read GetDefaultTintColorKey;
+    /// <summary>
+    ///   When you assign a stream to ResourceStream, TALDynamicImage takes ownership and will free it.
+    /// </summary>
+    property ResourceStream: TStream read FResourceStream write setResourceStream;
+    property OwnsResourceStream: Boolean read FOwnsResourceStream write FOwnsResourceStream;
   public
     //property Action;
     property Align;
@@ -1428,7 +1436,7 @@ begin
   MaskResourceName := AOwner.MaskResourceName;
   WrapMode := AOwner.WrapMode;
   CropCenter := AOwner.CropCenter.Point;
-  ApplyExifOrientation := AOwner.ApplyExifOrientation;
+  ApplyMetadataOrientation := AOwner.ApplyMetadataOrientation;
   StrokeColor := AOwner.Stroke.Color;
   StrokeThickness := AOwner.Stroke.Thickness;
   ShadowBlur := AOwner.Shadow.Blur;
@@ -1471,7 +1479,7 @@ begin
   FMaskResourceName := '';
   FHTTPHeaders := nil;
   FWrapMode := TALImageWrapMode.Fit;
-  FApplyExifOrientation := False;
+  FApplyMetadataOrientation := False;
   FCorners := DefaultCorners;
   FSides := DefaultSides;
   FXRadius := DefaultXRadius;
@@ -1544,7 +1552,7 @@ begin
       MaskResourceName := TALDynamicImage(Source).MaskResourceName;
       HTTPHeaders := TALDynamicImage(Source).HTTPHeaders;
       WrapMode := TALDynamicImage(Source).WrapMode;
-      ApplyExifOrientation := TALDynamicImage(Source).ApplyExifOrientation;
+      ApplyMetadataOrientation := TALDynamicImage(Source).ApplyMetadataOrientation;
       Corners := TALDynamicImage(Source).Corners;
       Sides := TALDynamicImage(Source).Sides;
       XRadius := TALDynamicImage(Source).XRadius;
@@ -1797,12 +1805,12 @@ begin
   end;
 end;
 
-{**********************************************************************}
-procedure TALDynamicImage.SetApplyExifOrientation(const Value: Boolean);
+{**************************************************************************}
+procedure TALDynamicImage.SetApplyMetadataOrientation(const Value: Boolean);
 begin
-  if FApplyExifOrientation <> Value then begin
+  if FApplyMetadataOrientation <> Value then begin
     ClearBufDrawable;
-    FApplyExifOrientation := Value;
+    FApplyMetadataOrientation := Value;
     Repaint;
   end;
 end;
@@ -2112,7 +2120,7 @@ end;
 
 {*************}
 //[MultiThread]
-class procedure TALDynamicImage.HandleResourceDownloadError(const AErrMessage: string; var AContext: Tobject);
+class procedure TALDynamicImage.HandleResourceDownloadError(const AResponse: IHTTPResponse; const AErrMessage: string; var AContext: Tobject);
 begin
   var LContext := TResourceDownloadContext(AContext);
   if LContext.FOwner = nil then exit;
@@ -2163,7 +2171,7 @@ begin
   LContext.MaskResourceName := '';
   LContext.WrapMode := TALImageWrapMode.Fit;
   //LContext.CropCenter: TpointF;
-  //LContext.ApplyExifOrientation: Boolean;
+  //LContext.ApplyMetadataOrientation: Boolean;
   LContext.StrokeColor := TalphaColors.Null;
   //LContext.StrokeThickness: Single;
   //LContext.ShadowBlur: Single;
@@ -2211,7 +2219,7 @@ begin
       LContext.MaskResourceName, // const AMaskResourceName: String;
       LContext.WrapMode, // const AWrapMode: TALImageWrapMode;
       LContext.CropCenter, // const ACropCenter: TpointF;
-      LContext.ApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+      LContext.ApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
       LContext.StrokeColor, // const AStrokeColor: TAlphaColor;
       LContext.StrokeThickness, // const AStrokeThickness: Single;
       LContext.ShadowBlur, // const AShadowBlur: Single;
@@ -2225,7 +2233,7 @@ begin
       LContext.BlurRadius); // const ABlurRadius: Single)
   except
     On E: Exception do begin
-      HandleResourceDownloadError(E.Message, AContext);
+      HandleResourceDownloadError(nil{AResponse}, E.Message, AContext);
       exit;
     end;
   End;
@@ -2269,7 +2277,7 @@ class Procedure TALDynamicImage.CreateBufDrawable(
                   const AMaskResourceName: String;
                   const AWrapMode: TALImageWrapMode;
                   const ACropCenter: TpointF;
-                  const AApplyExifOrientation: Boolean;
+                  const AApplyMetadataOrientation: Boolean;
                   const AStrokeColor: TAlphaColor;
                   const AStrokeThickness: Single;
                   const AShadowBlur: Single;
@@ -2309,7 +2317,7 @@ begin
                         AMaskResourceName, // const AMaskResourceName: String;
                         AScale, // const AScale: Single;
                         ABufDrawableRect.Width, ABufDrawableRect.Height, // const W, H: single;
-                        AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                        AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                         AWrapMode, // const AWrapMode: TALImageWrapMode;
                         ACropCenter, // const ACropCenter: TpointF;
                         ATintColor, // const ATintColor: TAlphaColor;
@@ -2373,7 +2381,7 @@ begin
         .SetFillResourceName(LResourceName)
         .SetFillResourceStream(AResourceStream)
         .SetFillMaskResourceName(AMaskResourceName)
-        .SetFillApplyExifOrientation(AApplyExifOrientation)
+        .SetFillApplyMetadataOrientation(AApplyMetadataOrientation)
         .SetFillImageTintColor(ATintColor)
         .SetFillWrapMode(AWrapMode)
         .SetFillCropCenter(ACropCenter)
@@ -2476,7 +2484,7 @@ begin
         '', // const AMaskResourceName: String;
         WrapMode, // const AWrapMode: TALImageWrapMode;
         TpointF.Zero, // const ACropCenter: TpointF;
-        false, // const AApplyExifOrientation: Boolean;
+        false, // const AApplyMetadataOrientation: Boolean;
         TAlphaColors.Null, // const AStrokeColor: TAlphaColor;
         0, // const AStrokeThickness: Single;
         0, // const AShadowBlur: Single;
@@ -2511,7 +2519,7 @@ begin
     MaskResourceName, // const AMaskResourceName: String;
     WrapMode, // const AWrapMode: TALImageWrapMode;
     CropCenter.Point, // const ACropCenter: TpointF;
-    ApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+    ApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
     Stroke.Color, // const AStrokeColor: TAlphaColor;
     Stroke.Thickness, // const AStrokeThickness: Single;
     Shadow.Blur, // const AShadowBlur: Single;
@@ -2869,9 +2877,11 @@ begin
     {$ENDIF}
   {$ENDIF}
   FResourceName := '';
+  FResourceStream := nil;
   FTintColor := DefaultTintColor;
   FTintColorKey := DefaultTintColorKey;
   FWrapMode := TALImageWrapMode.Fit;
+  FOwnsResourceStream := True;
   FOnAnimationFirstFrame := nil;
   FOnAnimationProcess := nil;
   FOnAnimationFinish := nil;
@@ -2882,6 +2892,8 @@ end;
 destructor TALDynamicAnimatedImage.Destroy;
 begin
   ReleaseCodec;
+  if FOwnsResourceStream then
+    ALFreeAndNil(FResourceStream);
   AlFreeAndNil(FAnimation);
   inherited;
 end;
@@ -2904,6 +2916,22 @@ begin
     if Source is TALDynamicAnimatedImage then begin
       Animation.Assign(TALDynamicAnimatedImage(Source).Animation);
       ResourceName := TALDynamicAnimatedImage(Source).ResourceName;
+      if (TALDynamicAnimatedImage(Source).OwnsResourceStream) and
+         (TALDynamicAnimatedImage(Source).ResourceStream <> nil) then begin
+        var LStream := TMemoryStream.Create;
+        try
+          LStream.CopyFrom(TALDynamicAnimatedImage(Source).ResourceStream);
+          ResourceStream := LStream;
+          OwnsResourceStream := True;
+        except
+          ALFreeAndNil(LStream);
+          raise;
+        end;
+      end
+      else begin
+        ResourceStream := TALDynamicAnimatedImage(Source).ResourceStream;
+        OwnsResourceStream := TALDynamicAnimatedImage(Source).OwnsResourceStream;
+      end;
       TintColor := TALDynamicAnimatedImage(Source).TintColor;
       TintColorKey := TALDynamicAnimatedImage(Source).TintColorKey;
       WrapMode := TALDynamicAnimatedImage(Source).WrapMode;
@@ -2951,8 +2979,8 @@ begin
 
   if //--- Do not create Codec if the size is 0
      (BoundsRect.IsEmpty) or
-     //--- Do not create Codec if FResourceName is empty
-     (FResourceName = '')
+     //--- Do not create Codec if FResourceName and FResourceStream are empty
+     ((FResourceName = '') and (FResourceStream = nil))
   then begin
     ReleaseCodec;
     exit;
@@ -2962,7 +2990,7 @@ begin
 
   var LFileName := ALGetResourceFilename(FResourceName);
 
-  if (LFileName <> '') and (FTintColor = TAlphaColors.Null) then begin
+  if (LFileName <> '') and (FResourceStream = nil) and (FTintColor = TAlphaColors.Null) then begin
     fSkottieAnimation := sk4d_skottieanimation_make_from_file(MarshaledAString(UTF8String(LFileName)), TSkDefaultProviders.TypefaceFont.Handle)
   end
   else begin
@@ -2970,7 +2998,8 @@ begin
     fSkottieAnimation := 0
     {$ELSE}
     var LStream: TStream;
-    if (FTintColor <> TAlphaColors.Null) then begin
+    if FResourceStream <> nil then LStream := FResourceStream
+    else if (FTintColor <> TAlphaColors.Null) then begin
       LStream := TALStringStreamA.Create('');
       try
         if (LFileName <> '') then TALStringStreamA(LStream).LoadFromFile(LFileName)
@@ -3046,8 +3075,10 @@ begin
       end;
     end
     else LStream := ALCreateResourceStream(FResourceName);
+
     try
 
+      LStream.Position := 0;
       var LSkStream := ALSkCheckHandle(sk4d_streamadapter_create(LStream));
       try
         var LStreamadapterProcs: sk_streamadapter_procs_t;
@@ -3063,23 +3094,30 @@ begin
       finally
         sk4d_streamadapter_destroy(LSKStream);
       end;
+
     finally
-      ALfreeandNil(LStream);
+      If LStream <> FResourceStream then
+        ALfreeandNil(LStream);
     end;
     {$ENDIF}
   end;
 
   if fSkottieAnimation = 0 then begin
-    if LFileName <> '' then begin
+    if (LFileName <> '') and (FResourceStream = nil) then begin
       fAnimCodecPlayer := sk4d_animcodecplayer_make_from_file(MarshaledAString(UTF8String(LFileName)))
     end
     else begin
       {$IFDEF ALDPK}
       fAnimCodecPlayer := 0
       {$ELSE}
-      var LResourceStream := ALCreateResourceStream(FResourceName);
+      var LStream: TStream;
+      if FResourceStream <> nil then LStream := FResourceStream
+      else LStream := ALCreateResourceStream(FResourceName);
+
       try
-        var LSkStream := ALSkCheckHandle(sk4d_streamadapter_create(LResourceStream));
+
+        LStream.Position := 0;
+        var LSkStream := ALSkCheckHandle(sk4d_streamadapter_create(LStream));
         try
           var LStreamadapterProcs: sk_streamadapter_procs_t;
           LStreamadapterProcs.get_length := ALSkStreamAdapterGetLengthProc;
@@ -3091,19 +3129,25 @@ begin
         finally
           sk4d_streamadapter_destroy(LSKStream);
         end;
+
       finally
-        ALfreeandNil(LResourceStream);
+        If LStream <> FResourceStream then
+          ALfreeandNil(LStream);
       end;
       {$ENDIF}
     end;
   end;
 
-  if (fSkottieAnimation = 0) and (fAnimCodecPlayer = 0) then
+  if (fSkottieAnimation = 0) and (fAnimCodecPlayer = 0) then begin
     {$IF not defined(ALDPK)}
-    Raise Exception.CreateFmt('Failed to create the animation codec for resource "%s". Please ensure the resource exists and is in a valid format', [FResourceName]);
+    if FResourceName <> '' then
+      Raise Exception.CreateFmt('Failed to create the animation codec for resource "%s". Please ensure the resource exists and is in a valid format', [FResourceName])
+    else
+      Raise Exception.Create('Failed to create the animation codec. Please ensure the resource is in a valid format');
     {$ELSE}
     Exit;
     {$ENDIF}
+  end;
 
   var LSize: TSizeF;
   if fSkottieAnimation <> 0 then begin
@@ -3121,7 +3165,10 @@ begin
   if SameValue(LSize.width, 0, Tepsilon.Position) or
      SameValue(LSize.Height, 0, Tepsilon.Position) then begin
     {$IF not defined(ALDPK)}
-    Raise Exception.CreateFmt('The animation "%s" has invalid dimensions (width or height is zero)', [FResourceName]);
+    if FResourceName <> '' then
+      Raise Exception.CreateFmt('The animation "%s" has invalid dimensions (width or height is zero)', [FResourceName])
+    else
+      Raise Exception.Create('The animation has invalid dimensions (width or height is zero)');
     {$ELSE}
     ReleaseCodec;
     Exit;
@@ -3169,6 +3216,7 @@ begin
   ALLog(
     'TALDynamicAnimatedImage.CreateCodec',
     'ResourceName: '+ FResourceName + ' | '+
+    'ResourceStream: '+ ALIntToStrW(Integer(FResourceStream)) + ' | '+
     'Duration: '+ALFloatTostrW(LDuration) + ' | '+
     'Width: ' + ALFloatTostrW(LSize.Width) + ' | '+
     'Height: ' + ALFloatTostrW(LSize.Height),
@@ -3353,6 +3401,18 @@ begin
   if FResourceName <> Value then begin
     releaseCodec;
     FResourceName := Value;
+    Repaint;
+  end;
+end;
+
+{************************************************************************}
+procedure TALDynamicAnimatedImage.setResourceStream(const Value: TStream);
+begin
+  if FResourceStream <> Value then begin
+    if FOwnsResourceStream then
+      ALFreeAndNil(FResourceStream);
+    ClearBufDrawable;
+    FResourceStream := Value;
     Repaint;
   end;
 end;

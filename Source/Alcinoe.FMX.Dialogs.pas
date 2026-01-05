@@ -34,6 +34,18 @@ type
       // ----------------
       // TOnActionObjProc
       TOnActionObjProc = procedure(Const ADialog: TALDialog; const AAction: Integer; var ACanClose: Boolean) of object;
+      // ---------------------------
+      // TOnRadioButtonChangeRefProc
+      TOnRadioButtonChangeRefProc = reference to procedure(Const ADialog: TALDialog; const ARadioButton: TALRadioButton);
+      // ------------------------
+      // TOnCheckBoxChangeRefProc
+      TOnCheckBoxChangeRefProc = reference to procedure(Const ADialog: TALDialog; const ACheckBox: TALCheckBox);
+      // ---------------
+      // TOnShownRefProc
+      TOnShownRefProc = reference to procedure(Const ADialog: TALDialog);
+      // ----------------
+      // TOnClosedRefProc
+      TOnClosedRefProc = reference to procedure(Const ADialog: TALDialog);
       // --------------------
       // TCustomDialogRefProc
       TCustomDialogRefProc = reference to procedure;
@@ -74,6 +86,11 @@ type
         function SetCustomDialogProc(const AValue: TCustomDialogObjProc): TBuilder; overload;
         function SetOnActionCallback(const AValue: TOnActionRefProc): TBuilder; overload;
         function SetOnActionCallback(const AValue: TOnActionObjProc): TBuilder; overload;
+        function SetOnRadioButtonChangeCallback(const AValue: TOnRadioButtonChangeRefProc): TBuilder; overload;
+        function SetOnCheckBoxChangeCallback(const AValue: TOnCheckBoxChangeRefProc): TBuilder; overload;
+        function SetOnShownCallback(const AValue: TOnShownRefProc): TBuilder;
+        function SetOnClosedCallback(const AValue: TOnClosedRefProc): TBuilder;
+        function SetShowAnimateOptions(const AValue: TAnimateOptions): TBuilder;
         /// <summary>
         ///   The Builder instance will be released during this operation.
         ///   If a dialog is already being shown and <c>AForceImmediateShow</c> is <c>false</c>,
@@ -107,7 +124,10 @@ type
     FCustomDialogObjProc: TCustomDialogObjProc;
     FOnActionRefProc: TOnActionRefProc;
     FOnActionObjProc: TOnActionObjProc;
-    FOnClosedRefProc: TProc;
+    FOnRadioButtonChangeRefProc: TOnRadioButtonChangeRefProc;
+    FOnCheckBoxChangeRefProc: TOnCheckBoxChangeRefProc;
+    FOnShownRefProc: TOnShownRefProc;
+    FOnClosedRefProc: TOnClosedRefProc;
     FVirtualKeyboardAnimation: TALFloatAnimation;
     function GetCloseOnScrimClick: boolean;
     procedure SetCloseOnScrimClick(const AValue: Boolean);
@@ -118,6 +138,8 @@ type
     function GetMessage: TALText;
     function GetButtonBar: TALRectangle;
     procedure SetCustomContainer(const AValue: TALControl);
+    procedure RadioButtonChange(Sender: TObject);
+    procedure CheckBoxChange(Sender: TObject);
     procedure VirtualKeyboardChangeHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
     procedure VirtualKeyboardAnimationProcess(Sender: TObject);
   protected
@@ -127,7 +149,7 @@ type
     destructor Destroy; override;
     procedure BeforeDestruction; override;
     class function Current: TALDialog;
-    class procedure CloseCurrent(const AOnClosedCallback: TProc = nil; const AAnimateOptions: TAnimateOptions = [TAnimateOption.AnimateScrim, TAnimateOption.AnimateContainer]);
+    class procedure CloseCurrent(const AOnClosedCallback: TOnClosedRefProc = nil; const AAnimateOptions: TAnimateOptions = [TAnimateOption.AnimateScrim, TAnimateOption.AnimateContainer]);
     function IsTransitioning: Boolean;
     property CloseOnScrimClick: Boolean read GetCloseOnScrimClick write SetCloseOnScrimClick;
     function HasContainer: Boolean;
@@ -165,7 +187,10 @@ type
     property CustomDialogObjProc: TCustomDialogObjProc read FCustomDialogObjProc write FCustomDialogObjProc;
     property OnActionRefProc: TOnActionRefProc read FOnActionRefProc write FOnActionRefProc;
     property OnActionObjProc: TOnActionObjProc read FOnActionObjProc write FOnActionObjProc;
-    property OnClosedRefProc: TProc read FOnClosedRefProc write FOnClosedRefProc;
+    property OnRadioButtonChangeRefProc: TOnRadioButtonChangeRefProc read FOnRadioButtonChangeRefProc write FOnRadioButtonChangeRefProc;
+    property OnCheckBoxChangeRefProc: TOnCheckBoxChangeRefProc read FOnCheckBoxChangeRefProc write FOnCheckBoxChangeRefProc;
+    property OnShownRefProc: TOnShownRefProc read FOnShownRefProc write FOnShownRefProc;
+    property OnClosedRefProc: TOnClosedRefProc read FOnClosedRefProc write FOnClosedRefProc;
   end;
 
   {~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~}
@@ -220,8 +245,6 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure AfterConstruction; override;
-    function GetMinDialogContainerWidth: Single;
-    function GetMaxDialogContainerWidth: Single;
     /// <summary>
     ///   If a dialog is already being shown and <c>AForceImmediateShow</c> is <c>false</c>,
     ///   the new dialog will be queued and displayed after the current one is closed.
@@ -424,6 +447,41 @@ begin
   Result := Self;
 end;
 
+{**************************************************************************************************************}
+function TALDialog.TBuilder.SetOnRadioButtonChangeCallback(const AValue: TOnRadioButtonChangeRefProc): TBuilder;
+begin
+  FDialog.OnRadioButtonChangeRefProc := AValue;
+  Result := Self;
+end;
+
+{********************************************************************************************************}
+function TALDialog.TBuilder.SetOnCheckBoxChangeCallback(const AValue: TOnCheckBoxChangeRefProc): TBuilder;
+begin
+  FDialog.OnCheckBoxChangeRefProc := AValue;
+  Result := Self;
+end;
+
+{**************************************************************************************}
+function TALDialog.TBuilder.SetOnShownCallback(const AValue: TOnShownRefProc): TBuilder;
+begin
+  FDialog.OnShownRefProc := AValue;
+  Result := Self;
+end;
+
+{****************************************************************************************}
+function TALDialog.TBuilder.SetOnClosedCallback(const AValue: TOnClosedRefProc): TBuilder;
+begin
+  FDialog.OnClosedRefProc := AValue;
+  Result := Self;
+end;
+
+{*****************************************************************************************}
+function TALDialog.TBuilder.SetShowAnimateOptions(const AValue: TAnimateOptions): TBuilder;
+begin
+  FDialog.ShowAnimateOptions := AValue;
+  Result := Self;
+end;
+
 {***************************************************************************}
 procedure TALDialog.TBuilder.Show(const AForceImmediateShow: Boolean = True);
 begin
@@ -456,6 +514,9 @@ begin
   FCustomDialogObjProc := nil;
   FOnActionRefProc := nil;
   FOnActionObjProc := nil;
+  FOnRadioButtonChangeRefProc := nil;
+  FOnCheckBoxChangeRefProc := nil;
+  FOnShownRefProc := nil;
   FOnClosedRefProc := nil;
   FVirtualKeyboardAnimation := nil;
   TMessageManager.DefaultManager.SubscribeToMessage(TVKStateChangeMessage, VirtualKeyboardChangeHandler);
@@ -491,13 +552,14 @@ begin
   Result := TALDialogManager.Instance.CurrentDialog;
 end;
 
-{************************************************************************************************************************************************************************************}
-class procedure TALDialog.CloseCurrent(const AOnClosedCallback: TProc = nil; const AAnimateOptions: TAnimateOptions = [TAnimateOption.AnimateScrim, TAnimateOption.AnimateContainer]);
+{***********************************************************************************************************************************************************************************************}
+class procedure TALDialog.CloseCurrent(const AOnClosedCallback: TOnClosedRefProc = nil; const AAnimateOptions: TAnimateOptions = [TAnimateOption.AnimateScrim, TAnimateOption.AnimateContainer]);
 begin
   if not TALDialogManager.HasInstance then exit;
   var LCurrentDialog := TALDialogManager.Instance.CurrentDialog;
   if LCurrentDialog <> nil then begin
-    LCurrentDialog.OnClosedRefProc := AOnClosedCallback;
+    if Assigned(AOnClosedCallback) then
+      LCurrentDialog.OnClosedRefProc := AOnClosedCallback;
     LCurrentDialog.CloseAnimateOptions := AAnimateOptions;
     TALDialogManager.Instance.CloseCurrentDialog;
   end;
@@ -510,6 +572,20 @@ begin
             (TALDialogManager.Instance.FContainerAnimation.Running or TALDialogManager.Instance.FScrimAnimation.Running);
 end;
 
+{*****************************************************}
+procedure TALDialog.RadioButtonChange(Sender: TObject);
+begin
+  if assigned(FOnRadioButtonChangeRefProc) then
+    FOnRadioButtonChangeRefProc(Self, TALRadioButton(Sender));
+end;
+
+{**************************************************}
+procedure TALDialog.CheckBoxChange(Sender: TObject);
+begin
+  if assigned(FOnCheckBoxChangeRefProc) then
+    FOnCheckBoxChangeRefProc(Self, TALCheckBox(Sender));
+end;
+
 {************************************************************************************************************}
 procedure TALDialog.VirtualKeyboardChangeHandler(const Sender: TObject; const Msg: System.Messaging.TMessage);
 begin
@@ -519,6 +595,8 @@ begin
   end;
   FVirtualKeyboardAnimation.Enabled := False;
   if TVKStateChangeMessage(Msg).KeyboardVisible then begin
+    if FVirtualKeyboardAnimation.Tag = 1 then exit;
+    FVirtualKeyboardAnimation.Tag := 1;
     {$IF defined(ANDROID)}
     FVirtualKeyboardAnimation.Duration := 0.300;
     {$ELSE}
@@ -529,6 +607,8 @@ begin
     FVirtualKeyboardAnimation.StopValue := TVKStateChangeMessage(Msg).KeyboardBounds.Height;
   end
   else begin
+    if FVirtualKeyboardAnimation.Tag = 0 then exit;
+    FVirtualKeyboardAnimation.Tag := 0;
     FVirtualKeyboardAnimation.Duration := 0.200;
     FVirtualKeyboardAnimation.InterpolationType := TALInterpolationType.Material3StandardDefaultEffects;
     FVirtualKeyboardAnimation.StartValue := margins.Bottom;
@@ -697,6 +777,7 @@ begin
   LRadioButton.Mandatory := AMandatory;
   LRadioButton.GroupName := 'ALDialogGroup';
   LRadioButton.Name := 'ALDialogRadioButton'+ALIntToStrW(ATag);
+  LRadioButton.OnChange := RadioButtonChange;
   var LLabel := TALText.Create(LLayout);
   LLabel.Parent := LLayout;
   LLabel.Assign(TALDialogManager.Instance.DefaultLabel);
@@ -717,6 +798,7 @@ begin
   LCheckBox.Tag := ATag;
   LCheckBox.Checked := AChecked;
   LCheckBox.Name := 'ALDialogCheckBox'+ALIntToStrW(ATag);
+  LCheckBox.OnChange := CheckBoxChange;
   var LLabel := TALText.Create(LLayout);
   LLabel.Parent := LLayout;
   LLabel.Assign(TALDialogManager.Instance.DefaultLabel);
@@ -1040,9 +1122,13 @@ begin
   FDefaultIcon := TALImage.Create(nil);
   FDefaultHeadline := TALText.Create(nil);
   FDefaultContent := TALVertScrollBox.Create(nil);
+  // To unsubscribe from TALScrollCapturedMessage
+  FDefaultContent.BeforeDestruction;
   FDefaultMessage := TALText.Create(nil);
   FDefaultOptionLayout := TALLayout.Create(nil);
   FDefaultRadioButton := TALRadioButton.Create(nil);
+  // To unsubscribe from TRadioButtonGroupMessage
+  FDefaultRadioButton.BeforeDestruction;
   FDefaultCheckBox := TALCheckbox.Create(nil);
   FDefaultInlineButton := TALButton.Create(nil);
   FDefaultEdit := TALDummyEdit.Create(nil);
@@ -1169,25 +1255,6 @@ begin
   end;
 end;
 
-{***********************************************************}
-function TALDialogManager.GetMinDialogContainerWidth: Single;
-begin
-  // https://m3.material.io/components/dialogs/specs
-  // Container width: Min 280dp; Max 560dp
-  Result := 280;
-end;
-
-{***********************************************************}
-function TALDialogManager.GetMaxDialogContainerWidth: Single;
-begin
-  // https://m3.material.io/components/dialogs/specs
-  // Container width: Min 280dp; Max 560dp
-  Var LForm := Screen.ActiveForm;
-  if LForm = nil then LForm := Application.MainForm;
-  if LForm = nil then Raise Exception.Create('Error 829A934F-F778-41AD-ACD8-8AD01B182D4A');
-  result := min(560, LForm.ClientWidth / 100 * 85);
-end;
-
 {*************************************************}
 function TALDialogManager.IsShowingDialog: Boolean;
 begin
@@ -1254,7 +1321,7 @@ begin
   FScrimAnimation.Enabled := False;
   FContainerAnimation.Enabled := False;
   if assigned(LCurrentDialog.FOnClosedRefProc) then
-    LCurrentDialog.FOnClosedRefProc();
+    LCurrentDialog.FOnClosedRefProc(LCurrentDialog);
   ProcessPendingDialogs;
   ALRestoreSystemBarsColor;
   if not IsShowingDialog then
@@ -1284,7 +1351,7 @@ begin
       if (TALLoadingOverlayManager.HasInstance) and
          (TALLoadingOverlayManager.Instance.IsShowingLoadingOverlay) then begin
         TALLoadingOverlay.CloseCurrent(
-          procedure
+          procedure (Const ALoadingOverlay: TALLoadingOverlay)
           begin
             if TALDialogManager.HasInstance then begin
               ADialog.ShowAnimateOptions := ADialog.ShowAnimateOptions - [TALDialog.TAnimateOption.AnimateScrim];
@@ -1343,29 +1410,40 @@ begin
   // Capture the system bars color
   ALCaptureSystemBarsColor;
 
-  // Init LForm & LClientWidth
+  // Init LForm & LClientHeight
   Var LForm: TCommonCustomForm;
+  var LClientWidth: Single;
   var LClientHeight: Single;
   if ADialog.ParentControl = nil then begin
     LForm := Screen.ActiveForm;
     if LForm = nil then LForm := Application.MainForm;
     if LForm = nil then Raise Exception.Create('Error 0B1C5551-F59D-46FA-8E9B-A10AB6A65FDE');
+    LClientWidth := LForm.ClientWidth;
     LClientHeight := LForm.ClientHeight;
   end
   else begin
     LForm := nil;
+    LClientWidth := ADialog.ParentControl.Width;
     LClientHeight := ADialog.ParentControl.Height;
   end;
 
+  // Init LMinDialogContainerWidth & LMaxDialogContainerWidth
+  // https://m3.material.io/components/dialogs/specs
+  // Container width: Min 280dp; Max 560dp
+  var LMinDialogContainerWidth: Single := 280;
+  // https://m3.material.io/components/dialogs/specs
+  // Container width: Min 280dp; Max 560dp
+  var LMaxDialogContainerWidth := min(560, LClientWidth / 100 * 85);
+
   // Update Width/MaxWith of some elements
   if ADialog.HasHeadline then
-    ADialog.Headline.MaxWidth := GetMaxDialogContainerWidth
+    ADialog.Headline.MaxWidth := LMaxDialogContainerWidth
                                  - ADialog.Headline.Margins.Left
                                  - ADialog.Headline.Margins.Right
                                  - ADialog.Container.padding.Left
                                  - ADialog.Container.padding.Right;
   if ADialog.HasMessage then
-    ADialog.Message.MaxWidth := GetMaxDialogContainerWidth
+    ADialog.Message.MaxWidth := LMaxDialogContainerWidth
                                 - ADialog.Message.Margins.Left
                                 - ADialog.Message.Margins.Right
                                 - ADialog.Content.Margins.Left
@@ -1375,8 +1453,9 @@ begin
   var LEdits := ADialog.GetEdits;
   for Var I := low(LEdits) to High(LEdits) do begin
     var LEdit := LEdits[i];
-    LEdit.Width := min(
-                     320, GetMaxDialogContainerWidth
+    LEdit.Width := Min(
+                     320,
+                     LMaxDialogContainerWidth
                      - LEdit.Margins.Left
                      - LEdit.Margins.Right
                      - ADialog.Container.padding.Left
@@ -1521,6 +1600,13 @@ begin
       LMarginTopAdjustment := 0;
       LEdit.Position.Y := LCurrY + LEdit.Margins.top;
       LCurrY := LEdit.Position.Y + LEdit.Height + LEdit.Margins.Bottom;
+      LEdit.Width := Max(
+                       LEdit.Width,
+                       LContainerWidth
+                       - LEdit.Margins.Left
+                       - LEdit.Margins.Right
+                       - ADialog.Container.padding.Left
+                       - ADialog.Container.padding.Right);
       LContainerWidth := max(
                            LContainerWidth,
                            ADialog.Container.Padding.Right +
@@ -1534,7 +1620,7 @@ begin
     if ADialog.HasButtonBar then begin
       ADialog.ButtonBar.Margins.top := ADialog.ButtonBar.Margins.top + LMarginTopAdjustment;
       //LMarginTopAdjustment := 0;
-      If ADialog.ButtonBar.Width > GetMaxDialogContainerWidth
+      If ADialog.ButtonBar.Width > LMaxDialogContainerWidth
                                    - ADialog.ButtonBar.Margins.Right
                                    - ADialog.ButtonBar.Margins.Left
                                    - ADialog.Container.padding.Right
@@ -1566,7 +1652,7 @@ begin
     // Adjust the container Width
     var LDummyControl := TALLayout.Create(ADialog.Container);
     LDummyControl.Parent := ADialog.Container;
-    LDummyControl.Width := max(GetMinDialogContainerWidth, LContainerWidth)
+    LDummyControl.Width := max(LMinDialogContainerWidth, LContainerWidth)
                            - ADialog.Container.padding.Right
                            - ADialog.Container.padding.left;
     LDummyControl.Height := 0;
@@ -1602,6 +1688,13 @@ begin
   FCurrentDialog := ADialog;
   FCurrentDialog.AddFreeNotify(Self);
 
+  if assigned(FCurrentDialog.FOnShownRefProc) then
+    FCurrentDialog.FOnShownRefProc(FCurrentDialog);
+
+  FScrimAnimation.Enabled := False;
+  FScrimAnimation.TagFloat := TAlphaColorRec(FCurrentDialog.Fill.Color).A / 255;
+  FContainerAnimation.Enabled := False;
+
   if assigned(FCurrentDialog.CustomDialogRefProc) then FCurrentDialog.CustomDialogRefProc()
   else if assigned(FCurrentDialog.CustomDialogObjProc) then FCurrentDialog.CustomDialogObjProc()
   else begin
@@ -1621,8 +1714,6 @@ begin
       FCurrentDialog.Container.Pivot.Point := TpointF.Create(0,0);
 
       if (TALDialog.TAnimateOption.AnimateScrim in FCurrentDialog.ShowAnimateOptions) then begin
-        FScrimAnimation.Enabled := False;
-        FScrimAnimation.TagFloat := TAlphaColorRec(FCurrentDialog.Fill.Color).A / 255;
         FScrimAnimation.InterpolationType := TALInterpolationType.Linear;
         FScrimAnimation.Duration := 0.4;
         FScrimAnimation.StartValue := 0;
@@ -1634,7 +1725,6 @@ begin
         SyncSystemBarsColor;
       end;
 
-      FContainerAnimation.Enabled := False;
       FContainerAnimation.TagFloat := LCurrentDialogCenteredPosY;
       FContainerAnimation.InterpolationType := TALInterpolationType.Material3ExpressiveDefaultSpatial;
       FContainerAnimation.Duration := 0.5;
@@ -1649,6 +1739,7 @@ begin
     end;
 
   end;
+
 end;
 
 {****************************************************************}

@@ -19,12 +19,14 @@ uses
   System.Skia.API,
   {$ENDIF}
   {$IF defined(ios)}
+  Macapi.CoreFoundation,
   iOSapi.CoreGraphics,
   iOSapi.CocoaTypes,
   iOSapi.UIKit,
   fmx.surfaces,
   {$ENDIF}
   {$IF defined(ALMacOS)}
+  Macapi.CoreFoundation,
   Macapi.CoreGraphics,
   Macapi.CocoaTypes,
   Macapi.AppKit,
@@ -150,6 +152,16 @@ function ALGetNearestSkSamplingoptions: sk_samplingoptions_t;
 procedure ALReleaseMemPixelBufferProc(const pixels: Pointer; context: Pointer); cdecl;
 {$ENDIF}
 
+{$IF defined(ALSkiaAvailable)}
+function ALFileExtensionToSkEncodedImageFormat(const AExt: string): sk_encodedimageformat_t;
+{$ENDIF}
+{$IF defined(ANDROID)}
+function ALFileExtensionToJBitmapCompressFormat(const AExt: string): JBitmap_CompressFormat;
+{$ENDIF}
+{$IF defined(ALAppleOS)}
+function ALFileExtensionToUTTypeImage(const AExt: string): CFStringRef;
+{$ENDIF}
+
 {$IF defined(ANDROID)}
 {$IF defined(ALSkiaAvailable)}
 procedure ALReleaseJavaPixelBufferProc(const pixels: Pointer; context: Pointer); cdecl;
@@ -210,8 +222,8 @@ type
     ROTATE_270 = 8);  // 270 CW
 
 function ALIsDefaultContextOpenGL: Boolean;
-function ALGetImageDimensions(const AStream: TStream; const AApplyExifOrientation: boolean = false): TSize; overload;
-function ALGetImageDimensions(const AResourceName: String; const AApplyExifOrientation: boolean = false): TSize; overload;
+function ALGetImageDimensions(const AStream: TStream; const AApplyMetadataOrientation: boolean = false): TSize; overload;
+function ALGetImageDimensions(const AResourceName: String; const AApplyMetadataOrientation: boolean = false): TSize; overload;
 function AlGetExifOrientation(const AFilename: String): TALExifOrientation; overload;
 function AlGetExifOrientation(const AStream: TStream): TALExifOrientation; overload;
 function AlGetImageSignature(const AStream: TStream; const ASignatureLength: integer = 12): Tbytes; overload;
@@ -282,7 +294,7 @@ function ALCreateSkSurfaceFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -295,7 +307,7 @@ function ALCreateSkImageFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -325,7 +337,7 @@ function ALCreateJBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -355,7 +367,7 @@ function ALCreateCGContextRefFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -368,7 +380,7 @@ function ALCreateCGImageRefFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -398,7 +410,7 @@ function ALCreateTBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -427,13 +439,17 @@ function ALCreateBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
            const ABlurRadius: single;
            const AXRadius: Single;
            const AYRadius: Single): TALBitmap; inline;
+procedure ALSaveBitmapToFile(
+            const AFilename: String;
+            const ABitmap: TALBitmap;
+            const AQuality: integer);
 
 {***********************}
 procedure ALDrawDrawable(
@@ -458,7 +474,7 @@ function ALCreateDrawableFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -487,7 +503,7 @@ Type
     FFillResourceName: String;
     FFillResourceStream: TStream;
     FFillMaskResourceName: String;
-    FFillApplyExifOrientation: Boolean;
+    FFillApplyMetadataOrientation: Boolean;
     FFillBackgroundMarginsRect: TRectF;
     FFillImageMarginsRect: TRectF;
     FFillImageTintColor: TAlphaColor;
@@ -535,7 +551,7 @@ Type
     function SetFillResourceName(const AValue: String): PALDrawRectangleHelper;
     function SetFillResourceStream(const AValue: TStream): PALDrawRectangleHelper;
     function SetFillMaskResourceName(const AValue: String): PALDrawRectangleHelper;
-    function SetFillApplyExifOrientation(const AValue: Boolean): PALDrawRectangleHelper;
+    function SetFillApplyMetadataOrientation(const AValue: Boolean): PALDrawRectangleHelper;
     function SetFillBackgroundMarginsRect(const AValue: TRectF): PALDrawRectangleHelper;
     function SetFillImageMarginsRect(const AValue: TRectF): PALDrawRectangleHelper;
     function SetFillImageTintColor(const AValue: TAlphaColor): PALDrawRectangleHelper;
@@ -671,7 +687,7 @@ function ALGetCachedBitmap(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -687,11 +703,17 @@ procedure ALCacheBitmap(
             const AHash: Integer;
             var ABitmap: TALBitmap);
 
+{$IF defined(DEBUG)}
+Threadvar
+  ALDisableResourceScaleMismatchLog: Boolean;
+{$ENDIF}
+
 implementation
 
 uses
   system.math,
   system.Hash,
+  System.IOUtils,
   {$IF defined(ALSkiaAvailable)}
   System.Skia,
   FMX.Skia,
@@ -721,7 +743,6 @@ uses
   iOSapi.Helpers,
   iOSapi.ImageIO,
   Macapi.ObjectiveC,
-  Macapi.CoreFoundation,
   Macapi.Helpers,
   Alcinoe.iOSapi.CoreFoundation,
   {$ENDIF}
@@ -730,14 +751,18 @@ uses
   Macapi.Foundation,
   Macapi.QuartzCore,
   Macapi.ObjectiveC,
-  Macapi.CoreFoundation,
   Macapi.Helpers,
   Macapi.ImageIO,
   Alcinoe.Macapi.QuartzCore,
   {$ENDIF}
+  {$IF defined(DEBUG)}
+  System.TypInfo,
+  Alcinoe.Localization,
+  {$ENDIF}
   FMX.Effects,
   System.UIConsts,
   Alcinoe.Url,
+  Alcinoe.StringUtils,
   Alcinoe.FMX.Types3D;
 
 {$IFNDEF ALCompilerVersionSupported130}
@@ -754,7 +779,7 @@ function ALGetCachedBitmapKey(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -790,7 +815,7 @@ begin
     SizeOf(Single) + // AScale
     SizeOf(Single) + // W
     SizeOf(Single) + // H
-    SizeOf(Boolean) + // AApplyExifOrientation
+    SizeOf(Boolean) + // AApplyMetadataOrientation
     SizeOf(Byte) + // AWrapMode
     SizeOf(Single) + // ACropCenter.X
     SizeOf(Single) + // ACropCenter.Y
@@ -834,7 +859,7 @@ begin
   PSingle(@AKey[LOffset])^ := H;
   Inc(LOffset, SizeOf(Single));
 
-  PBoolean(@AKey[LOffset])^ := AApplyExifOrientation;
+  PBoolean(@AKey[LOffset])^ := AApplyMetadataOrientation;
   Inc(LOffset, SizeOf(Boolean));
 
   PByte(@AKey[LOffset])^ := Byte(AWrapMode);
@@ -867,6 +892,107 @@ begin
   {$ENDIF}
 end;
 
+{******************}
+{$IF defined(DEBUG)}
+function ALFormatCachedBitmapKeyLog(const AKey: TBytes): string;
+begin
+  if Length(AKey) = 0 then begin
+    Result := 'KeyLength=0';
+    Exit;
+  end;
+
+  var LOffset: Integer := 0;
+
+  // --- Read AResourceName ---
+  var LResNameLen: Integer := PInteger(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Integer));
+  var LResourceName: string := '';
+  if LResNameLen > 0 then begin
+    SetLength(LResourceName, LResNameLen);
+    Move(AKey[LOffset], PChar(LResourceName)^, LResNameLen * SizeOf(Char));
+    Inc(LOffset, LResNameLen * SizeOf(Char));
+  end;
+
+  // --- Read AResourceStream pointer + size ---
+  var LStreamPtr: Pointer := PPointer(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Pointer));
+  var LStreamSize: Int64 := PInt64(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Int64));
+
+  // --- Read AMaskResourceName ---
+  var LMaskNameLen: Integer := PInteger(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Integer));
+  var LMaskResourceName: string := '';
+  if LMaskNameLen > 0 then begin
+    SetLength(LMaskResourceName, LMaskNameLen);
+    Move(AKey[LOffset], PChar(LMaskResourceName)^, LMaskNameLen * SizeOf(Char));
+    Inc(LOffset, LMaskNameLen * SizeOf(Char));
+  end;
+
+  // --- Read all numeric fields in same order as written ---
+
+  var LScale: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LW: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LH: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LApplyMetadataOrientation: Boolean := PBoolean(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Boolean));
+
+  var LWrapModeByte: Byte := PByte(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Byte));
+
+  var LCropCenterX: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LCropCenterY: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LTintColor: TAlphaColor := PAlphaColor(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(TAlphaColor));
+
+  var LBlurRadius: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LXRadius: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  var LYRadius: Single := PSingle(@AKey[LOffset])^;
+  Inc(LOffset, SizeOf(Single));
+
+  {$IFDEF DEBUG}
+  if LOffset <> Length(AKey) then
+    raise Exception.Create('Error 3D9BCE6B-B7A1-4CCB-80D5-E7F6C894088C');
+  {$ENDIF}
+
+  // --- WrapMode name from enum ---
+  var LWrapModeName: string :=
+    GetEnumName(TypeInfo(TALImageWrapMode), LWrapModeByte);
+
+  // --- Build final human-readable string ---
+  Result :=
+    'ResourceName="' + LResourceName + '"; ' +
+    Format('ResourceStreamPtr=%p; ResourceStreamSize=%d; ', [LStreamPtr, LStreamSize]) +
+    'MaskResourceName="' + LMaskResourceName + '"; ' +
+    'Scale=' + ALFloatToStrW(LScale) + '; ' +
+    'W=' + ALFloatToStrW(LW) + '; ' +
+    'H=' + ALFloatToStrW(LH) + '; ' +
+    'ApplyMetadataOrientation=' + ALBoolToStrW(LApplyMetadataOrientation, 'True', 'False') + '; ' +
+    'WrapMode=' + LWrapModeName + '; ' +
+    'CropCenter=(' +
+      ALFloatToStrW(LCropCenterX) + ',' +
+      ALFloatToStrW(LCropCenterY) + '); ' +
+    'TintColor=$' + ALIntToHexW(Cardinal(LTintColor), 8) + '; ' +
+    'BlurRadius=' + ALFloatToStrW(LBlurRadius) + '; ' +
+    'XRadius=' + ALFloatToStrW(LXRadius) + '; ' +
+    'YRadius=' + ALFloatToStrW(LYRadius);
+end;
+{$ENDIF}
+
 {****************************}
 {$IF defined(ALSkiaAvailable)}
 function ALGetCachedSkImage(
@@ -876,7 +1002,7 @@ function ALGetCachedSkImage(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -893,7 +1019,7 @@ begin
            AMaskResourceName, // const AMaskResourceName: String;
            AScale, // const AScale: Single;
            W, H, // const W, H: single;
-           AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+           AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
            AWrapMode, // const AWrapMode: TALImageWrapMode;
            ACropCenter, // const ACropCenter: TpointF;
            ATintColor, // const ATintColor: TalphaColor;
@@ -953,11 +1079,17 @@ begin
     end;
 
     while ACachedImages.Count >= AMaxCachedImages do begin
+      {$IF defined(DEBUG)}
+      //ALLog('ALCacheSkImage', 'Remove ' + ALFormatCachedBitmapKeyLog(ACachedImages.PList^[0].Key));
+      {$ENDIF}
       var LImage := ACachedImages.PList^[0].Value;
       sk4d_refcnt_unref(LImage);
       ACachedImages.Delete(0);
     end;
 
+    {$IF defined(DEBUG)}
+    //ALLog('ALCacheSkImage', 'Add ' + ALFormatCachedBitmapKeyLog(AKey));
+    {$ENDIF}
     ACachedImages.Add(TALTriplet<TBytes, sk_image_t, Integer>.Create(AKey, AImage, AHash));
 
   Finally
@@ -976,7 +1108,7 @@ function ALGetCachedJBitmap(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -993,7 +1125,7 @@ begin
            AMaskResourceName, // const AMaskResourceName: String;
            AScale, // const AScale: Single;
            W, H, // const W, H: single;
-           AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+           AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
            AWrapMode, // const AWrapMode: TALImageWrapMode;
            ACropCenter, // const ACropCenter: TpointF;
            ATintColor, // const ATintColor: TalphaColor;
@@ -1054,12 +1186,18 @@ begin
     end;
 
     while ACachedBitmaps.Count >= AMaxCachedBitmaps do begin
+      {$IF defined(DEBUG)}
+      //ALLog('ALCacheJBitmap', 'Remove ' + ALFormatCachedBitmapKeyLog(ACachedBitmaps.PList^[0].Key));
+      {$ENDIF}
       var LBitmap := ACachedBitmaps.PList^[0].Value;
       LBitmap.recycle;
       LBitmap := nil;
       ACachedBitmaps.Delete(0);
     end;
 
+    {$IF defined(DEBUG)}
+    //ALLog('ALCacheJBitmap', 'Add ' + ALFormatCachedBitmapKeyLog(AKey));
+    {$ENDIF}
     ACachedBitmaps.Add(TALTriplet<TBytes, JBitmap, Integer>.Create(AKey, ABitmap, AHash));
 
   Finally
@@ -1078,7 +1216,7 @@ function ALGetCachedCGImageRef(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -1095,7 +1233,7 @@ begin
            AMaskResourceName, // const AMaskResourceName: String;
            AScale, // const AScale: Single;
            W, H, // const W, H: single;
-           AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+           AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
            AWrapMode, // const AWrapMode: TALImageWrapMode;
            ACropCenter, // const ACropCenter: TpointF;
            ATintColor, // const ATintColor: TalphaColor;
@@ -1155,11 +1293,17 @@ begin
     end;
 
     while ACachedImages.Count >= AMaxCachedImages do begin
+      {$IF defined(DEBUG)}
+      //ALLog('ALCacheCGImageRef', 'Remove ' + ALFormatCachedBitmapKeyLog(ACachedImages.PList^[0].Key));
+      {$ENDIF}
       var LImage := ACachedImages.PList^[0].Value;
       CGImageRelease(LImage);
       ACachedImages.Delete(0);
     end;
 
+    {$IF defined(DEBUG)}
+    //ALLog('ALCacheCGImageRef', 'Add ' + ALFormatCachedBitmapKeyLog(AKey));
+    {$ENDIF}
     ACachedImages.Add(TALTriplet<TBytes, CGImageRef, Integer>.Create(AKey, AImage, AHash));
 
   Finally
@@ -1177,7 +1321,7 @@ function ALGetCachedTBitmap(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -1194,7 +1338,7 @@ begin
            AMaskResourceName, // const AMaskResourceName: String;
            AScale, // const AScale: Single;
            W, H, // const W, H: single;
-           AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+           AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
            AWrapMode, // const AWrapMode: TALImageWrapMode;
            ACropCenter, // const ACropCenter: TpointF;
            ATintColor, // const ATintColor: TalphaColor;
@@ -1252,11 +1396,17 @@ begin
     end;
 
     while ACachedBitmaps.Count >= AMaxCachedBitmaps do begin
+      {$IF defined(DEBUG)}
+      //ALLog('ALCacheTBitmap', 'Remove ' + ALFormatCachedBitmapKeyLog(ACachedBitmaps.PList^[0].Key));
+      {$ENDIF}
       var LBitmap := ACachedBitmaps.PList^[0].Value;
       ALFreeAndNil(LBitmap);
       ACachedBitmaps.Delete(0);
     end;
 
+    {$IF defined(DEBUG)}
+    //ALLog('ALCacheTBitmap', 'Add ' + ALFormatCachedBitmapKeyLog(AKey));
+    {$ENDIF}
     ACachedBitmaps.Add(TALTriplet<TBytes, TBitmap, Integer>.Create(AKey, ABitmap, AHash));
 
   Finally
@@ -1273,7 +1423,7 @@ function ALGetCachedBitmap(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -1290,7 +1440,7 @@ begin
            AMaskResourceName, // const AMaskResourceName: String;
            AScale, // const AScale: Single;
            W, H, // const W, H: single;
-           AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+           AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
            AWrapMode, // const AWrapMode: TALImageWrapMode;
            ACropCenter, // const ACropCenter: TpointF;
            ATintColor, // const ATintColor: TalphaColor;
@@ -1348,11 +1498,17 @@ begin
     end;
 
     while ACachedBitmaps.Count >= AMaxCachedBitmaps do begin
+      {$IF defined(DEBUG)}
+      //ALLog('ALCacheBitmap', 'Remove ' + ALFormatCachedBitmapKeyLog(ACachedBitmaps.PList^[0].Key));
+      {$ENDIF}
       var LBitmap := ACachedBitmaps.PList^[0].Value;
       ALFreeAndNilBitmap(LBitmap);
       ACachedBitmaps.Delete(0);
     end;
 
+    {$IF defined(DEBUG)}
+    //ALLog('ALCacheBitmap', 'Add ' + ALFormatCachedBitmapKeyLog(AKey));
+    {$ENDIF}
     ACachedBitmaps.Add(TALTriplet<TBytes, TALBitmap, Integer>.Create(AKey, ABitmap, AHash));
 
   Finally
@@ -1397,6 +1553,76 @@ begin
   ALLog('ALCreateSkImageFromJBitmap.ReleaseJavaPixelBufferProc');
   {$ENDIF}
   TJavaArray<Integer>(context).Free;
+end;
+{$ENDIF}
+
+{****************************}
+{$IF defined(ALSkiaAvailable)}
+function ALFileExtensionToSkEncodedImageFormat(const AExt: string): sk_encodedimageformat_t;
+begin
+  var LExt := ALLowerCase(AExt);
+  if LExt = '' then raise Exception.Create('Empty extension');
+  if LExt[low(LExt)] <> '.' then LExt := '.' + LExt;
+
+  if LExt = '.png' then Result := PNG_SK_ENCODEDIMAGEFORMAT
+  else if (LExt = '.jpg') or
+          (LExt = '.jpeg') or
+          (LExt = '.jpe') then Result := JPEG_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.webp' then Result := WEBP_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.gif' then Result := GIF_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.bmp' then Result := BMP_SK_ENCODEDIMAGEFORMAT
+  else if (LExt = '.heif') or
+          (LExt = '.heic') then Result := HEIF_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.avif' then Result := AVIF_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.ico' then Result := ICO_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.wbmp' then Result := WBMP_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.pkm' then Result := PKM_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.ktx' then Result := KTX_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.astc' then Result := ASTC_SK_ENCODEDIMAGEFORMAT
+  else if LExt = '.dng' then Result := DNG_SK_ENCODEDIMAGEFORMAT
+  else raise Exception.CreateFmt('Unknown extension "%s"', [AExt]);
+end;
+{$ENDIF}
+
+{********************}
+{$IF defined(ANDROID)}
+function ALFileExtensionToJBitmapCompressFormat(const AExt: string): JBitmap_CompressFormat;
+begin
+  var LExt := ALLowerCase(AExt);
+  if LExt = '' then raise Exception.Create('Empty extension');
+  if LExt[low(LExt)] <> '.' then LExt := '.' + LExt;
+
+  if LExt = '.png' then Result := TJBitmap_CompressFormat.JavaClass.PNG
+  else if (LExt = '.jpg') or
+          (LExt = '.jpeg') or
+          (LExt = '.jpe') then Result := TJBitmap_CompressFormat.JavaClass.JPEG
+  else if LExt = '.webp' then Result := TJBitmap_CompressFormat.JavaClass.WEBP_LOSSY
+  else raise Exception.CreateFmt('Unknown extension "%s"', [AExt]);
+end;
+{$ENDIF}
+
+{**********************}
+{$IF defined(ALAppleOS)}
+function ALFileExtensionToUTTypeImage(const AExt: string): CFStringRef;
+begin
+  var LExt := ALLowerCase(AExt);
+  if LExt = '' then raise Exception.Create('Empty extension');
+  if LExt[low(LExt)] <> '.' then LExt := '.' + LExt;
+
+  if LExt = '.png' then Result := CFSTR('public.png') // UTTypePNG
+  else if (LExt = '.jpg') or
+          (LExt = '.jpeg') or
+          (LExt = '.jpe') then Result := CFSTR('public.jpeg') // UTTypeJPEG
+  else if LExt = '.webp' then Result := CFSTR('org.webmproject.webp') // UTTypeWebP
+  else if LExt = '.gif' then Result := CFSTR('com.compuserve.gif') // UTTypeGIF
+  else if LExt = '.bmp' then Result := CFSTR('com.microsoft.bmp') // UTTypeBMP
+  else if LExt = '.heif' then Result := CFSTR('public.heif') // UTTypeHEIF
+  else if LExt = '.heic' then Result := CFSTR('public.heic')  // UTTypeHEIC
+  else if LExt = '.ico' then Result := CFSTR('com.microsoft.ico') // UTTypeICO
+  else if LExt = '.dng' then Result := CFSTR('com.adobe.raw-image') // UTTypeDNG
+  else if (LExt = '.tif') or
+          (LExt = '.tiff') then Result := CFSTR('public.tiff') // UTTypeTIFF
+  else raise Exception.CreateFmt('Unknown extension "%s"', [AExt]);
 end;
 {$ENDIF}
 
@@ -1604,8 +1830,8 @@ begin
   result := ALDefaultContextIsOpenGL;
 end;
 
-{*********************************************************************************************************}
-function ALGetImageDimensions(const AStream: TStream; const AApplyExifOrientation: boolean = false): TSize;
+{*************************************************************************************************************}
+function ALGetImageDimensions(const AStream: TStream; const AApplyMetadataOrientation: boolean = false): TSize;
 begin
 
   {$REGION 'ANDROID'}
@@ -1690,7 +1916,7 @@ begin
   {$ENDIF}
   {$ENDREGION}
 
-  if AApplyExifOrientation then begin
+  if AApplyMetadataOrientation then begin
     var LExifOrientation := AlGetExifOrientation(AStream);
     if LExifOrientation in [TALExifOrientation.TRANSPOSE,
                             TALExifOrientation.ROTATE_90,
@@ -1704,15 +1930,15 @@ begin
 
 end;
 
-{**************************************************************************************************************}
-function ALGetImageDimensions(const AResourceName: String; const AApplyExifOrientation: boolean = false): TSize;
+{******************************************************************************************************************}
+function ALGetImageDimensions(const AResourceName: String; const AApplyMetadataOrientation: boolean = false): TSize;
 begin
   var LFileName := ALGetResourceFilename(AResourceName);
   var LStream: TStream;
   if LFileName <> '' then LStream := TFileStream.Create(LFileName, fmOpenRead)
   else LStream := ALCreateResourceStream(AResourceName);
   try
-    Result := ALGetImageDimensions(LStream, AApplyExifOrientation);
+    Result := ALGetImageDimensions(LStream, AApplyMetadataOrientation);
   finally
     ALfreeandNil(LStream);
   end;
@@ -2708,7 +2934,7 @@ function ALCreateSkSurfaceFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -2737,21 +2963,29 @@ begin
         try
           LImage := ALSkCheckHandle(sk4d_image_make_from_encoded_stream(LSkStream));
           {$IF defined(DEBUG)}
-          if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) and
-             (
-              ((AWrapMode in [TALImageWrapMode.Fit, TALImageWrapMode.FitAndCrop]) and
-               (not SameValue(((W * AScale) / ALGetScreenScale) * 4, sk4d_image_get_width(LImage), TEpsilon.Position)) and
-               (not SameValue(((H * AScale) / ALGetScreenScale) * 4, sk4d_image_get_height(LImage), TEpsilon.Position)))
-              or
-              ((AWrapMode in [TALImageWrapMode.Stretch]) and
-               ((not SameValue(((W * AScale) / ALGetScreenScale) * 4, sk4d_image_get_width(LImage), TEpsilon.Position)) or
-                (not SameValue(((H * AScale) / ALGetScreenScale) * 4, sk4d_image_get_height(LImage), TEpsilon.Position))))
-             ) then
+          if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) then begin
             ALLog(
               'ALCreateSkSurfaceFromResource',
-              '"%s" is %dx%d; expected ~4× (%.g×%.g). Requested %.g×%.g @ scale %.g',
-              [AResourceName, sk4d_image_get_width(LImage), sk4d_image_get_height(LImage), RoundTo(((W * AScale) / ALGetScreenScale) * 4, -2), RoundTo(((H * AScale) / ALGetScreenScale) * 4, -2), RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale],
-              TALLogType.WARN);
+              '%s (%.g×%.g @ scale %.g)',
+              [AResourceName, RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale]);
+
+            if (not ALDisableResourceScaleMismatchLog) and
+               (
+                ((AWrapMode in [TALImageWrapMode.Fit, TALImageWrapMode.FitAndCrop]) and
+                 (not SameValue(((W * AScale) / ALGetScreenScale) * 4, sk4d_image_get_width(LImage), TEpsilon.Position)) and
+                 (not SameValue(((H * AScale) / ALGetScreenScale) * 4, sk4d_image_get_height(LImage), TEpsilon.Position)))
+                or
+                ((AWrapMode in [TALImageWrapMode.Stretch]) and
+                 ((not SameValue(((W * AScale) / ALGetScreenScale) * 4, sk4d_image_get_width(LImage), TEpsilon.Position)) or
+                  (not SameValue(((H * AScale) / ALGetScreenScale) * 4, sk4d_image_get_height(LImage), TEpsilon.Position))))
+               )
+            then
+              ALLog(
+                'ALCreateSkSurfaceFromResource',
+                '"%s" is %dx%d; expected ~4× (%.g×%.g). Requested %.g×%.g @ scale %.g',
+                [AResourceName, sk4d_image_get_width(LImage), sk4d_image_get_height(LImage), RoundTo(((W * AScale) / ALGetScreenScale) * 4, -2), RoundTo(((H * AScale) / ALGetScreenScale) * 4, -2), RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale],
+                TALLogType.WARN);
+          end;
           {$ENDIF}
         finally
           sk4d_streamadapter_destroy(LSkStream);
@@ -2782,7 +3016,7 @@ begin
                         '', // const AMaskResourceName: String;
                         AScale, // const AScale: Single;
                         W, H, // const W, H: single;
-                        False, // const AApplyExifOrientation: Boolean;
+                        False, // const AApplyMetadataOrientation: Boolean;
                         AWrapMode, // const AWrapMode: TALImageWrapMode;
                         TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                         TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -2799,7 +3033,7 @@ begin
                           '', // const AMaskResourceName: String;
                           AScale, // const AScale: Single;
                           W, H, // const W, H: single;
-                          False, // const AApplyExifOrientation: Boolean;
+                          False, // const AApplyMetadataOrientation: Boolean;
                           AWrapMode, // const AWrapMode: TALImageWrapMode;
                           TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                           TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -2914,7 +3148,7 @@ function ALCreateSkImageFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -2928,7 +3162,7 @@ begin
                     AMaskResourceName, // const AMaskResourceName: String;
                     AScale, // const AScale: Single;
                     W, H, // const W, H: single;
-                    AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                    AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                     AWrapMode, // const AWrapMode: TALImageWrapMode;
                     ACropCenter, // const ACropCenter: TpointF;
                     ATintColor, // const ATintColor: TalphaColor;
@@ -3208,7 +3442,7 @@ function ALCreateJBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -3280,22 +3514,28 @@ begin
   var LBitmap: JBitmap;
   var LExifOrientation := TALExifOrientation.UNDEFINED;
   if AResourceStream <> nil then begin
-    if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(AResourceStream);
+    if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(AResourceStream);
     LBitmap := _CreateJBitmapFromStream(AResourceStream);
   end
   else if AResourceName <> '' then begin
     var LFileName := ALGetResourceFilename(AResourceName);
     if LFileName <> '' then begin
-      if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(LFileName);
+      if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(LFileName);
       LBitmap := _CreateJBitmapFromFile(LFileName)
     end
     else begin
       var LResourceStream := ALCreateResourceStream(AResourceName);
       try
-        if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(LResourceStream);
+        if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(LResourceStream);
         LBitmap := _CreateJBitmapFromStream(LResourceStream);
         {$IF defined(DEBUG)}
-        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) and
+        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) then begin
+          ALLog(
+            'ALCreateSkSurfaceFromResource',
+            '%s (%.g×%.g @ scale %.g)',
+            [AResourceName, RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale]);
+
+        if (not ALDisableResourceScaleMismatchLog) and
            (
             ((AWrapMode in [TALImageWrapMode.Fit, TALImageWrapMode.FitAndCrop]) and
              (not SameValue(((W * AScale) / ALGetScreenScale) * 4, LBitmap.GetWidth, TEpsilon.Position)) and
@@ -3304,12 +3544,14 @@ begin
             ((AWrapMode in [TALImageWrapMode.Stretch]) and
              ((not SameValue(((W * AScale) / ALGetScreenScale) * 4, LBitmap.GetWidth, TEpsilon.Position)) or
               (not SameValue(((H * AScale) / ALGetScreenScale) * 4, LBitmap.GetHeight, TEpsilon.Position))))
-           ) then
+           )
+        then
           ALLog(
             'ALCreateJBitmapFromResource',
             '"%s" is %dx%d; expected ~4× (%.g×%.g). Requested %.g×%.g @ scale %.g',
             [AResourceName, LBitmap.GetWidth, LBitmap.GetHeight, RoundTo(((W * AScale) / ALGetScreenScale) * 4, -2), RoundTo(((H * AScale) / ALGetScreenScale) * 4, -2), RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale],
             TALLogType.WARN);
+        end;
         {$ENDIF}
       finally
         ALfreeandNil(LResourceStream);
@@ -3322,7 +3564,7 @@ begin
   try
 
     // Apply EXIF orientation (if requested) BEFORE wrap/crop/tint/blur
-    if AApplyExifOrientation and (not (LExifOrientation in [TALExifOrientation.NORMAL, TALExifOrientation.UNDEFINED])) then begin
+    if AApplyMetadataOrientation and (not (LExifOrientation in [TALExifOrientation.NORMAL, TALExifOrientation.UNDEFINED])) then begin
       var LRotatedBitmap := _ApplyExifOrientationToBitmap(LBitmap, LExifOrientation);
       if not LBitmap.equals(LRotatedBitmap) then begin
         LBitmap.recycle;
@@ -3346,7 +3588,7 @@ begin
                          '', // const AMaskResourceName: String;
                          AScale, // const AScale: Single;
                          W, H, // const W, H: single;
-                         False, // const AApplyExifOrientation: Boolean;
+                         False, // const AApplyMetadataOrientation: Boolean;
                          AWrapMode, // const AWrapMode: TALImageWrapMode;
                          TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                          TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -3363,7 +3605,7 @@ begin
                            '', // const AMaskResourceName: String;
                            AScale, // const AScale: Single;
                            W, H, // const W, H: single;
-                           False, // const AApplyExifOrientation: Boolean;
+                           False, // const AApplyMetadataOrientation: Boolean;
                            AWrapMode, // const AWrapMode: TALImageWrapMode;
                            TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                            TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -3767,7 +4009,7 @@ function ALCreateCGContextRefFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -3905,22 +4147,28 @@ begin
   var LOSImage: ALOSImage;
   var LExifOrientation := TALExifOrientation.UNDEFINED;
   if AResourceStream <> nil then begin
-    if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(AResourceStream);
+    if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(AResourceStream);
     LOSImage := _CreateOSImageFromStream(AResourceStream)
   end
   else if AResourceName <> '' then begin
     var LFileName := ALGetResourceFilename(AResourceName);
     if LFileName <> '' then begin
-      if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(LFileName);
+      if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(LFileName);
       LOSImage := _CreateOSImageFromFile(LFileName)
     end
     else begin
       var LResourceStream := ALCreateResourceStream(AResourceName);
       try
-        if AApplyExifOrientation then LExifOrientation := AlGetExifOrientation(LResourceStream);
+        if AApplyMetadataOrientation then LExifOrientation := AlGetExifOrientation(LResourceStream);
         LOSImage := _CreateOSImageFromStream(LResourceStream);
         {$IF defined(DEBUG)}
-        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) and
+        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) then begin
+          ALLog(
+            'ALCreateSkSurfaceFromResource',
+            '%s (%.g×%.g @ scale %.g)',
+            [AResourceName, RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale]);
+
+        if (not ALDisableResourceScaleMismatchLog) and
            (
             ((AWrapMode in [TALImageWrapMode.Fit, TALImageWrapMode.FitAndCrop]) and
              (not SameValue(((W * AScale) / ALGetScreenScale) * 4, ALOSImageGetWidth(LOSImage), TEpsilon.Position)) and
@@ -3929,12 +4177,14 @@ begin
             ((AWrapMode in [TALImageWrapMode.Stretch]) and
              ((not SameValue(((W * AScale) / ALGetScreenScale) * 4, ALOSImageGetWidth(LOSImage), TEpsilon.Position)) or
               (not SameValue(((H * AScale) / ALGetScreenScale) * 4, ALOSImageGetHeight(LOSImage), TEpsilon.Position))))
-           ) then
+           )
+        then
           ALLog(
             'ALCreateCGContextRefFromResource',
             '"%s" is %dx%d; expected ~4× (%.g×%.g). Requested %.g×%.g @ scale %.g',
             [AResourceName, ALOSImageGetWidth(LOSImage), ALOSImageGetHeight(LOSImage), RoundTo(((W * AScale) / ALGetScreenScale) * 4, -2), RoundTo(((H * AScale) / ALGetScreenScale) * 4, -2), RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale],
             TALLogType.WARN);
+        end;
         {$ENDIF}
       finally
         ALfreeandNil(LResourceStream);
@@ -3958,7 +4208,7 @@ begin
     try
 
       // Apply EXIF orientation (if requested) BEFORE wrap/crop/tint/blur
-      if AApplyExifOrientation and (not (LExifOrientation in [TALExifOrientation.NORMAL, TALExifOrientation.UNDEFINED])) then begin
+      if AApplyMetadataOrientation and (not (LExifOrientation in [TALExifOrientation.NORMAL, TALExifOrientation.UNDEFINED])) then begin
         LImage := _ApplyExifOrientationToCGImage(LImage, LExifOrientation);
         LOwnsImage := True;
       end;
@@ -3972,7 +4222,7 @@ begin
                         '', // const AMaskResourceName: String;
                         AScale, // const AScale: Single;
                         W, H, // const W, H: single;
-                        False, // const AApplyExifOrientation: Boolean;
+                        False, // const AApplyMetadataOrientation: Boolean;
                         AWrapMode, // const AWrapMode: TALImageWrapMode;
                         TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                         TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -3989,7 +4239,7 @@ begin
                           '', // const AMaskResourceName: String;
                           AScale, // const AScale: Single;
                           W, H, // const W, H: single;
-                          False, // const AApplyExifOrientation: Boolean;
+                          False, // const AApplyMetadataOrientation: Boolean;
                           AWrapMode, // const AWrapMode: TALImageWrapMode;
                           TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                           TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -4104,7 +4354,7 @@ function ALCreateCGImageRefFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -4118,7 +4368,7 @@ begin
                          AMaskResourceName, // const AMaskResourceName: String;
                          AScale, // const AScale: Single;
                          W, H, // const W, H: single;
-                         AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                         AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                          AWrapMode, // const AWrapMode: TALImageWrapMode;
                          ACropCenter, // const ACropCenter: TpointF;
                          ATintColor, // const ATintColor: TalphaColor;
@@ -4299,7 +4549,7 @@ function ALCreateTBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -4318,7 +4568,13 @@ begin
       try
         LBitmap := Tbitmap.CreateFromStream(LResourceStream);
         {$IF defined(DEBUG)}
-        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) and
+        if (SameValue(ALGetScreenScale, 4, TEpsilon.Scale)) then begin
+          ALLog(
+            'ALCreateSkSurfaceFromResource',
+            '%s (%.g×%.g @ scale %.g)',
+            [AResourceName, RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale]);
+
+        if (not ALDisableResourceScaleMismatchLog) and
            (
             ((AWrapMode in [TALImageWrapMode.Fit, TALImageWrapMode.FitAndCrop]) and
              (not SameValue(((W * AScale) / ALGetScreenScale) * 4, LBitmap.Width, TEpsilon.Position)) and
@@ -4327,12 +4583,14 @@ begin
             ((AWrapMode in [TALImageWrapMode.Stretch]) and
              ((not SameValue(((W * AScale) / ALGetScreenScale) * 4, LBitmap.Width, TEpsilon.Position)) or
               (not SameValue(((H * AScale) / ALGetScreenScale) * 4, LBitmap.Height, TEpsilon.Position))))
-           ) then
+           )
+        then
           ALLog(
             'ALCreateTBitmapFromResource',
             '"%s" is %dx%d; expected ~4× (%.g×%.g). Requested %.g×%.g @ scale %.g',
             [AResourceName, LBitmap.Width, LBitmap.Height, RoundTo(((W * AScale) / ALGetScreenScale) * 4, -2), RoundTo(((H * AScale) / ALGetScreenScale) * 4, -2), RoundTo(W * AScale, -2), RoundTo(H * AScale, -2), ALGetScreenScale],
             TALLogType.WARN);
+        end;
         {$ENDIF}
       finally
         ALfreeandNil(LResourceStream);
@@ -4360,7 +4618,7 @@ begin
                          '', // const AMaskResourceName: String;
                          AScale, // const AScale: Single;
                          W, H, // const W, H: single;
-                         False, // const AApplyExifOrientation: Boolean;
+                         False, // const AApplyMetadataOrientation: Boolean;
                          AWrapMode, // const AWrapMode: TALImageWrapMode;
                          TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                          TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -4377,7 +4635,7 @@ begin
                            '', // const AMaskResourceName: String;
                            AScale, // const AScale: Single;
                            W, H, // const W, H: single;
-                           False, // const AApplyExifOrientation: Boolean;
+                           False, // const AApplyMetadataOrientation: Boolean;
                            AWrapMode, // const AWrapMode: TALImageWrapMode;
                            TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                            TAlphaColors.Null, // const ATintColor: TalphaColor;
@@ -4569,7 +4827,7 @@ function ALCreateBitmapFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -4584,7 +4842,7 @@ begin
               AMaskResourceName, // const AMaskResourceName: String;
               AScale, // const AScale: Single;
               W, H, // const W, H: single;
-              AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+              AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
               AWrapMode, // const AWrapMode: TALImageWrapMode;
               ACropCenter, // const ACropCenter: TpointF;
               ATintColor, // const ATintColor: TalphaColor;
@@ -4598,7 +4856,7 @@ begin
               AMaskResourceName, // const AMaskResourceName: String;
               AScale, // const AScale: Single;
               W, H, // const W, H: single;
-              AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+              AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
               AWrapMode, // const AWrapMode: TALImageWrapMode;
               ACropCenter, // const ACropCenter: TpointF;
               ATintColor, // const ATintColor: TalphaColor;
@@ -4612,7 +4870,7 @@ begin
               AMaskResourceName, // const AMaskResourceName: String;
               AScale, // const AScale: Single;
               W, H, // const W, H: single;
-              AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+              AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
               AWrapMode, // const AWrapMode: TALImageWrapMode;
               ACropCenter, // const ACropCenter: TpointF;
               ATintColor, // const ATintColor: TalphaColor;
@@ -4626,7 +4884,7 @@ begin
               AMaskResourceName, // const AMaskResourceName: String;
               AScale, // const AScale: Single;
               W, H, // const W, H: single;
-              AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+              AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
               AWrapMode, // const AWrapMode: TALImageWrapMode;
               ACropCenter, // const ACropCenter: TpointF;
               ATintColor, // const ATintColor: TalphaColor;
@@ -4634,6 +4892,105 @@ begin
               AXRadius, // const AXRadius: Single;
               AYRadius); // const AYRadius: Single);;
   {$ENDIF}
+end;
+
+{***************************}
+procedure ALSaveBitmapToFile(
+            const AFilename: String;
+            const ABitmap: TALBitmap;
+            const AQuality: integer);
+begin
+
+  if AFilename = '' then
+    raise Exception.Create('AFilename must not be empty');
+  TDirectory.CreateDirectory(TPath.GetDirectoryName(AFilename));
+
+  if ALIsBitmapNull(ABitmap) then
+    raise Exception.Create('ABitmap must not be nil');
+
+  var LQuality: Integer := EnsureRange(AQuality, 0, 100);
+
+  {$IF defined(ALSkiaEngine)}
+
+  if not sk4d_image_encode_to_file(
+           ABitmap, // const self: sk_image_t;
+           MarshaledAString(UTF8String(AFilename)), // const file_name: MarshaledAString;
+           ALFileExtensionToSkEncodedImageFormat(ALExtractFileExt(AFileName)), // format: sk_encodedimageformat_t;
+           LQuality) then // quality: int32_t
+    raise Exception.Create('sk4d_image_encode_to_file failed');
+
+  {$ELSEIF defined(ANDROID)}
+
+  var LFileOutputStream := TJFileOutputStream.JavaClass.init(TJFile.JavaClass.init(StringToJString(AFilename)));
+  try
+    if not ABitmap.compress(
+             ALFileExtensionToJBitmapCompressFormat(ALExtractFileExt(AFileName)), // format: JBitmap_CompressFormat
+             LQuality, // quality: Integer
+             LFileOutputStream) then // stream: JOutputStream
+      raise Exception.Create('JBitmap.compress failed');
+    LFileOutputStream.flush;
+  finally
+    LFileOutputStream.close;
+  end;
+
+  {$ELSEIF defined(ALAppleOS)}
+
+  var LPath: CFStringRef := CFStringCreateWithCString(nil{alloc}, MarshaledAString(UTF8Encode(AFileName)){cStr}, kCFStringEncodingUTF8{encoding});
+  if LPath = nil then raise Exception.Create('Unable to convert filename to CFString');
+  try
+    var LUrl: CFURLRef := CFURLCreateWithFileSystemPath(nil{allocator}, LPath{filePath}, kCFURLPOSIXPathStyle{pathStyle}, False{isDirectory});
+    if LUrl = nil then raise Exception.Create('Unable to create file URL');
+    try
+      var LImageDestinationRef := CGImageDestinationCreateWithURL(
+                                    LURL, // url: CFURLRef;
+                                    ALFileExtensionToUTTypeImage(ALExtractFileExt(AFileName)), // &type: CFStringRef;
+                                    1, // count: NativeUInt;
+                                    nil); // options: CFDictionaryRef
+      if LImageDestinationRef = nil then raise Exception.Create('Unable to create CGImageDestination');
+      try
+        var LKeys: array [0..0] of Pointer;
+        var LValue: array [0..0] of Pointer;
+        var LFloatVal: Single := LQuality / 100;
+        LKeys[0] := kCGImageDestinationLossyCompressionQuality;
+        LValue[0] := CFNumberCreate(nil{allocator}, kCFNumberFloat32Type{theType}, @LFloatVal{valuePtr});
+        try
+          var LProperties := CFDictionaryCreate(nil{allocator}, @LKeys[0]{keys}, @LValue[0]{values}, 1{numValues}, nil{keyCallBacks}, nil{valueCallBacks});
+          if LProperties = nil then raise Exception.Create('Unable to create export properties');
+          try
+            CGImageDestinationAddImage(LImageDestinationRef{idst}, ABitmap{image}, LProperties{properties});
+            {$IFNDEF ALCompilerVersionSupported130}
+              {$MESSAGE WARN 'Check the status of https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4714 and adjust the IFDEF'}
+            {$ENDIF}
+            {$IF defined(IOS)}
+            if not CGImageDestinationFinalize(LImageDestinationRef{idst}) then
+            {$ELSE}
+            if not Boolean(CGImageDestinationFinalize(LImageDestinationRef{idst})) then
+            {$ENDIF}
+              raise Exception.Create('Unable to finalize image export');
+          finally
+            CFRelease(LProperties);
+          end;
+        finally
+          CFRelease(LValue[0]);
+        end;
+      finally
+        CFRelease(LImageDestinationRef);
+      end;
+    finally
+      CFRelease(LUrl);
+    end;
+  finally
+    CFRelease(LPath);
+  end;
+
+  {$ELSE}
+
+  var LBitmapCodecSaveParams: TBitmapCodecSaveParams;
+  LBitmapCodecSaveParams.Quality := LQuality;
+  Abitmap.SaveToFile(AFilename, @LBitmapCodecSaveParams);
+
+  {$ENDIF}
+
 end;
 
 {***********************}
@@ -4779,7 +5136,7 @@ function ALCreateDrawableFromResource(
            const AMaskResourceName: String;
            const AScale: Single;
            const W, H: single;
-           const AApplyExifOrientation: Boolean;
+           const AApplyMetadataOrientation: Boolean;
            const AWrapMode: TALImageWrapMode;
            const ACropCenter: TpointF;
            const ATintColor: TalphaColor;
@@ -4795,7 +5152,7 @@ begin
                 AMaskResourceName, // const AMaskResourceName: String;
                 AScale, // const AScale: Single;
                 W, H, // const W, H: single;
-                AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                 AWrapMode, // const AWrapMode: TALImageWrapMode;
                 ACropCenter, // const ACropCenter: TpointF;
                 ATintColor, // const ATintColor: TalphaColor;
@@ -4809,7 +5166,7 @@ begin
                       AMaskResourceName, // const AMaskResourceName: String;
                       AScale, // const AScale: Single;
                       W, H, // const W, H: single;
-                      AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                      AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                       AWrapMode, // const AWrapMode: TALImageWrapMode;
                       ACropCenter, // const ACropCenter: TpointF;
                       ATintColor, // const ATintColor: TalphaColor;
@@ -4833,7 +5190,7 @@ begin
                    AMaskResourceName, // const AMaskResourceName: String;
                    AScale, // const AScale: Single;
                    W, H, // const W, H: single;
-                   AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                   AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                    AWrapMode, // const AWrapMode: TALImageWrapMode;
                    ACropCenter, // const ACropCenter: TpointF;
                    ATintColor, // const ATintColor: TalphaColor;
@@ -4853,7 +5210,7 @@ begin
                          AMaskResourceName, // const AMaskResourceName: String;
                          AScale, // const AScale: Single;
                          W, H, // const W, H: single;
-                         AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                         AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                          AWrapMode, // const AWrapMode: TALImageWrapMode;
                          ACropCenter, // const ACropCenter: TpointF;
                          ATintColor, // const ATintColor: TalphaColor;
@@ -4876,7 +5233,7 @@ begin
               AMaskResourceName, // const AMaskResourceName: String;
               AScale, // const AScale: Single;
               W, H, // const W, H: single;
-              AApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+              AApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
               AWrapMode, // const AWrapMode: TALImageWrapMode;
               ACropCenter, // const ACropCenter: TpointF;
               ATintColor, // const ATintColor: TalphaColor;
@@ -4911,7 +5268,7 @@ begin
   FFillResourceName := '';
   FFillResourceStream := nil;
   FFillMaskResourceName := '';
-  FFillApplyExifOrientation := False;
+  FFillApplyMetadataOrientation := False;
   FFillBackgroundMarginsRect := TRectF.Empty;
   FFillImageMarginsRect := TRectF.Empty;
   FFillImageTintColor := TAlphaColors.Null;
@@ -4977,7 +5334,7 @@ begin
   FFillGradientOffsets := Afill.Gradient.Offsets;
   FFillResourceName := AFill.ResourceName;
   FFillResourceStream := AFill.ResourceStream;
-  FFillApplyExifOrientation := AFill.ApplyExifOrientation;
+  FFillApplyMetadataOrientation := AFill.ApplyMetadataOrientation;
   FFillBackgroundMarginsRect := AFill.BackgroundMargins.Rect;
   FFillImageMarginsRect := AFill.ImageMargins.Rect;
   FFillImageTintColor := AFill.ImageTintColor;
@@ -5055,10 +5412,10 @@ begin
   Result := @Self;
 end;
 
-{*********************************************************************************************************}
-function TALDrawRectangleHelper.SetFillApplyExifOrientation(const AValue: Boolean): PALDrawRectangleHelper;
+{*************************************************************************************************************}
+function TALDrawRectangleHelper.SetFillApplyMetadataOrientation(const AValue: Boolean): PALDrawRectangleHelper;
 begin
-  FFillApplyExifOrientation := AValue;
+  FFillApplyMetadataOrientation := AValue;
   Result := @Self;
 end;
 
@@ -6927,7 +7284,7 @@ begin
                           FFillMaskResourceName, // const AMaskResourceName: String;
                           1, // const AScale: Single;
                           LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                          FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                          FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                           FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                           FFillCropCenter, // const ACropCenter: TpointF;
                           FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -6948,7 +7305,7 @@ begin
                           FFillMaskResourceName, // const AMaskResourceName: String;
                           1, // const AScale: Single;
                           LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                          FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                          FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                           FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                           FFillCropCenter, // const ACropCenter: TpointF;
                           FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7231,7 +7588,7 @@ begin
                        FFillMaskResourceName, // const AMaskResourceName: String;
                        1, // const AScale: Single;
                        LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                       FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                       FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                        FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                        FFillCropCenter, // const ACropCenter: TpointF;
                        FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7252,7 +7609,7 @@ begin
                        FFillMaskResourceName, // const AMaskResourceName: String;
                        1, // const AScale: Single;
                        LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                       FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                       FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                        FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                        FFillCropCenter, // const ACropCenter: TpointF;
                        FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7581,7 +7938,7 @@ begin
                       FFillMaskResourceName, // const AMaskResourceName: String;
                       1, // const AScale: Single;
                       LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                      FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                      FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                       FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                       FFillCropCenter, // const ACropCenter: TpointF;
                       FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7602,7 +7959,7 @@ begin
                       FFillMaskResourceName, // const AMaskResourceName: String;
                       1, // const AScale: Single;
                       LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                      FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                      FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                       FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                       FFillCropCenter, // const ACropCenter: TpointF;
                       FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7733,7 +8090,7 @@ begin
                      FFillMaskResourceName, // const AMaskResourceName: String;
                      1, // const AScale: Single;
                      LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                     FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                     FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                      FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                      FFillCropCenter, // const ACropCenter: TpointF;
                      FFillImageTintColor, // const ATintColor: TalphaColor;
@@ -7754,7 +8111,7 @@ begin
                      FFillMaskResourceName, // const AMaskResourceName: String;
                      1, // const AScale: Single;
                      LScaledImageDstRect.Width, LScaledImageDstRect.Height, // const W, H: single;
-                     FFillApplyExifOrientation, // const AApplyExifOrientation: Boolean;
+                     FFillApplyMetadataOrientation, // const AApplyMetadataOrientation: Boolean;
                      FFillWrapMode, // const AWrapMode: TALImageWrapMode;
                      FFillCropCenter, // const ACropCenter: TpointF;
                      FFillImageTintColor, // const ATintColor: TalphaColor;

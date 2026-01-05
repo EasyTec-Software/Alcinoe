@@ -295,6 +295,7 @@ var
   ALDefaultEstimateLineHeightMultiplier: TALEstimateLineHeightMultiplier = nil;
 
 function ALEstimateLineHeightMultiplier(Const AFontSize: Single): Single;
+function ALResolveLineHeightMultiplier(Const AFontSize: Single; const ALineHeightMultiplier: Single): Single;
 function ALGetTextElementsByID(Const ATextElements: TALTextElements; Const AId: String): TALTextElements;
 
 implementation
@@ -419,6 +420,14 @@ begin
     Result := ALLineHeightMultipliers[LRoundFontSize]
   else
     Result := 0;
+end;
+
+{***********************************************************************************************************}
+function ALResolveLineHeightMultiplier(Const AFontSize: Single; const ALineHeightMultiplier: Single): Single;
+begin
+  Result := ALineHeightMultiplier;
+  if sameValue(Result, 0, TEpsilon.Scale) and Assigned(ALDefaultEstimateLineHeightMultiplier) then
+    Result := ALDefaultEstimateLineHeightMultiplier(AFontSize);
 end;
 
 {*******************************************************************************************************}
@@ -2404,10 +2413,8 @@ begin
                   // taller or shorter than the font size. The height property allows manual adjustment of the height of the line
                   // as a multiple of fontSize. For most fonts, setting height to 1.0 is not the same as omitting or setting
                   // height to null.
-                  var LTmpLineHeightMultiplier: Single := LLineHeightMultiplier;
-                  if sameValue(LTmpLineHeightMultiplier, 0, TEpsilon.Scale) and Assigned(ALDefaultEstimateLineHeightMultiplier) then
-                    LTmpLineHeightMultiplier := ALDefaultEstimateLineHeightMultiplier(LFontSize / LScale);
-                  if CompareValue(LTmpLineHeightMultiplier, 0, TEpsilon.Scale) > 0 then
+                  var LTmpLineHeightMultiplier: Single := ALResolveLineHeightMultiplier(LFontSize / LScale, LLineHeightMultiplier);
+                  if CompareValue(LTmpLineHeightMultiplier, 0, TEpsilon.Scale) > 0  then
                     sk4d_textstyle_set_height_multiplier(LTextStyle, LTmpLineHeightMultiplier);
 
                   // Push the style
@@ -2788,7 +2795,7 @@ begin
                                       '', // const AMaskResourceName: String;
                                       1, // const AScale: Single;
                                       LDstRect.Width, LDstRect.Height, // const W, H: single;
-                                      False, // const AApplyExifOrientation: Boolean;
+                                      False, // const AApplyMetadataOrientation: Boolean;
                                       TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                                       TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                                       Cardinal(LPlaceHolders.Objects[i]), // const ATintColor: TalphaColor;
@@ -2809,7 +2816,7 @@ begin
                                       '', // const AMaskResourceName: String;
                                       1, // const AScale: Single;
                                       LDstRect.Width, LDstRect.Height, // const W, H: single;
-                                      False, // const AApplyExifOrientation: Boolean;
+                                      False, // const AApplyMetadataOrientation: Boolean;
                                       TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                                       TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                                       Cardinal(LPlaceHolders.Objects[i]), // const ATintColor: TalphaColor;
@@ -3518,11 +3525,9 @@ begin
             // To be in pair with skia, by default, text will layout with line height as defined by the font. Font-metrics defined line height may be
             // taller or shorter than the font size. The height property allows manual adjustment of the height of the line
             // as a multiple of fontSize. For most fonts, setting height to 1.0 is not the same as omitting or setting
-            // height to null.
+            // height to null. To summarize: when LineHeightMultiplier is set, lineHeight = fontSize * LineHeightMultiplier.
             var LDrawTextOffsetY: Single;
-            var LTmpLineHeightMultiplier: Single := LLineHeightMultiplier;
-            if sameValue(LTmpLineHeightMultiplier, 0, TEpsilon.Scale) and Assigned(ALDefaultEstimateLineHeightMultiplier) then
-              LTmpLineHeightMultiplier := ALDefaultEstimateLineHeightMultiplier(LFontSize / LScale);
+            var LTmpLineHeightMultiplier: Single := ALResolveLineHeightMultiplier(LFontSize / LScale, LLineHeightMultiplier);
             if CompareValue(LTmpLineHeightMultiplier, 0, TEpsilon.Scale) > 0 then begin
               var LOldAscent := LFontMetrics.Ascent;
               var LRatio: Single := (LFontSize / (-LFontMetrics.Ascent + LFontMetrics.Descent));
@@ -4154,7 +4159,7 @@ begin
                              '', // const AMaskResourceName: String;
                              1, // const AScale: Single;
                              LDstRect.Width, LDstRect.Height, // const W, H: single;
-                             False, // const AApplyExifOrientation: Boolean;
+                             False, // const AApplyMetadataOrientation: Boolean;
                              TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                              TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                              LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;
@@ -4175,7 +4180,7 @@ begin
                              '', // const AMaskResourceName: String;
                              1, // const AScale: Single;
                              LDstRect.Width, LDstRect.Height, // const W, H: single;
-                             False, // const AApplyExifOrientation: Boolean;
+                             False, // const AApplyMetadataOrientation: Boolean;
                              TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                              TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                              LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;
@@ -4256,7 +4261,7 @@ begin
                             '', // const AMaskResourceName: String;
                             1, // const AScale: Single;
                             LDstRect.Width, LDstRect.Height, // const W, H: single;
-                            False, // const AApplyExifOrientation: Boolean;
+                            False, // const AApplyMetadataOrientation: Boolean;
                             TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                             TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                             LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;
@@ -4277,7 +4282,7 @@ begin
                             '', // const AMaskResourceName: String;
                             1, // const AScale: Single;
                             LDstRect.Width, LDstRect.Height, // const W, H: single;
-                            False, // const AApplyExifOrientation: Boolean;
+                            False, // const AApplyMetadataOrientation: Boolean;
                             TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                             TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                             LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;
@@ -4375,7 +4380,7 @@ begin
                              '', // const AMaskResourceName: String;
                              1, // const AScale: Single;
                              LDstRect.Width, LDstRect.Height, // const W, H: single;
-                             False, // const AApplyExifOrientation: Boolean;
+                             False, // const AApplyMetadataOrientation: Boolean;
                              TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                              TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                              LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;
@@ -4396,7 +4401,7 @@ begin
                              '', // const AMaskResourceName: String;
                              1, // const AScale: Single;
                              LDstRect.Width, LDstRect.Height, // const W, H: single;
-                             False, // const AApplyExifOrientation: Boolean;
+                             False, // const AApplyMetadataOrientation: Boolean;
                              TALImageWrapMode.Stretch, // const AWrapMode: TALImageWrapMode;
                              TpointF.Create(0.5,0.5), // const ACropCenter: TpointF;
                              LExtendedTextElement.ImgTintColor, // const ATintColor: TalphaColor;

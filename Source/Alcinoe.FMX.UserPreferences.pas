@@ -108,7 +108,9 @@ uses
 constructor TALUserPreferences.Create;
 begin
   {$IF defined(Android)}
-  FSharedPreferences := TAndroidHelper.Activity.getPreferences(TJContext.JavaClass.MODE_PRIVATE);
+  FSharedPreferences := TAndroidHelper.Activity.getSharedPreferences(
+                          StringToJString(JStringToString(TAndroidHelper.Activity.getPackageName) + '.user_preferences'),
+                          TJContext.JavaClass.MODE_PRIVATE);
   FAESKey := nil;
   {$ENDIF}
   {$IF defined(ALAppleOS)}
@@ -120,10 +122,7 @@ begin
   {$ENDIF}
   {$IF defined(MSWindows) and (not defined(ALDPK))}
   FSection := 'Settings';
-  var LHomePath := TPath.Combine(TPath.GetHomePath, ALGetModuleFileNameW(true{AWithoutExtension}));
-  if not TDirectory.Exists(LHomePath) then
-    TDirectory.CreateDirectory(LHomePath);
-  FIniFile := TALIniFileW.Create(TPath.Combine(LHomePath, 'UserPreferences.ini'));
+  FIniFile := TALIniFileW.Create(TPath.Combine(ALGetAppDataPathW, 'UserPreferences.ini'));
   {$ENDIF}
   inherited;
 end;

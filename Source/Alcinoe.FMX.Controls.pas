@@ -205,6 +205,12 @@ type
     property PropagateMouseEvents: Boolean read FPropagateMouseEvents write FPropagateMouseEvents default True;
   end;
 
+  {******************************************}
+  TALControlHelper = class helper for TControl
+  public
+    function IsAncestorOf(const AControl: IControl): Boolean;
+  end;
+
   {*************************************}
   {$IFNDEF ALCompilerVersionSupported130}
     {$MESSAGE WARN 'Check if FMX.Controls.TContent was not updated and adjust the IFDEF'}
@@ -1187,6 +1193,7 @@ begin
               LSize.Width := Max(LSize.Width, LChildControl.Position.X + LChildControl.width + LChildControl.Margins.right + padding.right)
             else
               LSize.Width := Max(LSize.Width, Width);
+            LSize.height := Max(LSize.height, LChildControl.Margins.top + padding.top + LChildControl.Height + LChildControl.Margins.bottom + padding.bottom);
           End;
 
           //--
@@ -1196,6 +1203,7 @@ begin
               LSize.height := Max(LSize.height, LChildControl.Position.Y + LChildControl.Height + LChildControl.Margins.bottom + padding.bottom)
             else
               LSize.height := Max(LSize.Height, Height);
+            LSize.Width := Max(LSize.Width, LChildControl.Margins.left + padding.left + LChildControl.width + LChildControl.Margins.right + padding.right);
           End;
 
           //--
@@ -1876,6 +1884,19 @@ begin
     FALParentControl := TALControl(ParentControl)
   else
     FALParentControl := nil;
+end;
+
+{************************************************************************}
+function TALControlHelper.IsAncestorOf(const AControl: IControl): Boolean;
+begin
+  Result := False;
+  if AControl = nil then Exit;
+  var LObject := AControl.GetObject;
+  while LObject <> nil do begin
+    if LObject.Parent = Self then Exit(True);
+    LObject := LObject.Parent;
+  end;
+  Result := False;
 end;
 
 {*************************************}
