@@ -9,6 +9,33 @@ interface
 uses
   Winapi.Windows;
 
+type
+  wchar_t = WideChar;
+  PSTR = PAnsiChar;
+  PPSTR = ^PSTR;
+  PCSTR = PAnsiChar;
+  PPCSTR = ^PCSTR;
+  PCWSTR = PWideChar;
+  PPCWSTR = ^PCWSTR;
+  PWSTR = PWideChar;
+  PPWSTR = ^PWSTR;
+  PPUCHAR = ^PUCHAR;
+  PLARGE_INTEGER = ^LARGE_INTEGER;
+  PPBYTE = ^PBYTE;
+  GUID = TGUID;
+  HANDLE = THandle;
+  PSECURITY_ATTRIBUTES = ^SECURITY_ATTRIBUTES;
+  LPOVERLAPPED = POVERLAPPED;
+  SECURITY_STATUS = LONG;
+
+type
+  UNICODE_STRING = record
+    Length: USHORT;
+    MaximumLength: USHORT;
+    Buffer: PWSTR;
+  end;
+  PUNICODE_STRING = ^UNICODE_STRING;
+
 function RtlNtStatusToDosError(Status: NTSTATUS): ULONG; stdcall; external 'ntdll.dll';
 
 const
@@ -86,10 +113,16 @@ const
   LOGON_NETCREDENTIALS_ONLY = $2;
 
 procedure ALCheckWinApiErrorCode(const AExtraInfo: String; const AErrorCode: DWORD; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiWSAErrorCode(const AExtraInfo: String; const AErrorCode: Integer; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiNTStatus(const AExtraInfo: String; const AStatus: NTSTATUS; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiSecurityStatus(const AExtraInfo: String; const AStatus: SECURITY_STATUS; const AModuleHandle: HMODULE = 0); overload; inline;
 procedure ALCheckWinApiBoolean(const AExtraInfo: String; const ABoolean: Boolean; const AModuleHandle: HMODULE = 0); overload; inline;
 function  ALCheckWinApiHandle(const AExtraInfo: String; const AHandle: THandle; const AModuleHandle: HMODULE = 0): THandle; overload; inline;
 function  ALCheckWinApiPointer(const AExtraInfo: String; const APointer: Pointer; const AModuleHandle: HMODULE = 0): Pointer; overload; inline;
 procedure ALCheckWinApiErrorCode(const AErrorCode: DWORD; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiWSAErrorCode(const AErrorCode: Integer; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiNTStatus(const AStatus: NTSTATUS; const AModuleHandle: HMODULE = 0); overload; inline;
+procedure ALCheckWinApiSecurityStatus(const AStatus: SECURITY_STATUS; const AModuleHandle: HMODULE = 0); overload; inline;
 procedure ALCheckWinApiBoolean(const ABoolean: Boolean; const AModuleHandle: HMODULE = 0); overload; inline;
 function  ALCheckWinApiHandle(const AHandle: THandle; const AModuleHandle: HMODULE = 0): THandle; overload; inline;
 function  ALCheckWinApiPointer(const APointer: Pointer; const AModuleHandle: HMODULE = 0): Pointer; overload; inline;
@@ -97,7 +130,9 @@ function  ALCheckWinApiPointer(const APointer: Pointer; const AModuleHandle: HMO
 implementation
 
 uses
-  System.SysUtils;
+  System.SysUtils,
+  Winapi.Winsock2,
+  Alcinoe.WinApi.WinError;
 
 {********************************************************************************************************************}
 procedure ALCheckWinApiErrorCode(const AExtraInfo: String; const AErrorCode: DWORD; const AModuleHandle: HMODULE = 0);
@@ -108,6 +143,52 @@ begin
     if LErrorMessage = '' then LErrorMessage := 'A call to an OS function failed';
     if (AExtraInfo <> '') then raise Exception.CreateFmt('%s (code=%d, hex=0x%X) - %s', [LErrorMessage, AErrorCode, AErrorCode, AExtraInfo])
     else raise Exception.CreateFmt('%s (code=%d, hex=0x%X)', [LErrorMessage, AErrorCode, AErrorCode]);
+  end;
+end;
+
+{*************************************************************************************************************************}
+procedure ALCheckWinApiWSAErrorCode(const AExtraInfo: String; const AErrorCode: Integer; const AModuleHandle: HMODULE = 0);
+begin
+  if AErrorCode <> 0 then begin
+    var LErrorCode := AErrorCode;
+    if LErrorCode = SOCKET_ERROR then begin
+      LErrorCode := WSAGetLastError;
+      if LErrorCode = 0 then LErrorCode := AErrorCode;
+    end;
+    var LErrorMessage := SysErrorMessage(LErrorCode, AModuleHandle);
+    if (LErrorMessage = '') and (AModuleHandle <> 0) then LErrorMessage := SysErrorMessage(LErrorCode);
+    if LErrorMessage = '' then LErrorMessage := 'A WinSock call failed';
+    if (AExtraInfo <> '') then raise Exception.CreateFmt('%s (code=%d, hex=0x%X) - %s', [LErrorMessage, LErrorCode, LErrorCode, AExtraInfo])
+    else raise Exception.CreateFmt('%s (code=%d, hex=0x%X)', [LErrorMessage, LErrorCode, LErrorCode]);
+  end;
+end;
+
+{*******************************************************************************************************************}
+procedure ALCheckWinApiNTStatus(const AExtraInfo: String; const AStatus: NTSTATUS; const AModuleHandle: HMODULE = 0);
+begin
+  if AStatus < 0 then begin
+    var LWin32Error: Cardinal := Cardinal(RtlNtStatusToDosError(AStatus));
+    var LErrorMessage: String;
+    if LWin32Error <> 0 then begin
+      LErrorMessage := SysErrorMessage(LWin32Error, AModuleHandle);
+      if (LErrorMessage = '') and (AModuleHandle <> 0) then LErrorMessage := SysErrorMessage(LWin32Error);
+    end
+    else LErrorMessage := '';
+    if LErrorMessage = '' then LErrorMessage := 'A call to an NT API function failed';
+    if (AExtraInfo <> '') then raise Exception.CreateFmt('%s (ntstatus=%d) - %s', [LErrorMessage, AStatus, AExtraInfo])
+    else raise Exception.CreateFmt('%s (ntstatus=%d)', [LErrorMessage, AStatus]);
+  end;
+end;
+
+{********************************************************************************************************************************}
+procedure ALCheckWinApiSecurityStatus(const AExtraInfo: String; const AStatus: SECURITY_STATUS; const AModuleHandle: HMODULE = 0);
+begin
+  if AStatus <> SEC_E_OK then begin
+    var LErrorMessage := SysErrorMessage(AStatus, AModuleHandle);
+    if (LErrorMessage = '') and (AModuleHandle <> 0) then LErrorMessage := SysErrorMessage(AStatus);
+    if LErrorMessage = '' then LErrorMessage := 'A call to a security function failed';
+    if (AExtraInfo <> '') then raise Exception.CreateFmt('%s (status=%d, hex=0x%.8x) - %s', [LErrorMessage, AStatus, AStatus, AExtraInfo])
+    else raise Exception.CreateFmt('%s (status=%d, hex=0x%.8x)', [LErrorMessage, AStatus, AStatus]);
   end;
 end;
 
@@ -149,6 +230,24 @@ end;
 procedure ALCheckWinApiErrorCode(const AErrorCode: DWORD; const AModuleHandle: HMODULE = 0);
 begin
   ALCheckWinApiErrorCode(''{AExtraInfo}, AErrorCode, AModuleHandle);
+end;
+
+{***********************************************************************************************}
+procedure ALCheckWinApiWSAErrorCode(const AErrorCode: Integer; const AModuleHandle: HMODULE = 0);
+begin
+  ALCheckWinApiWSAErrorCode(''{AExtraInfo}, AErrorCode, AModuleHandle);
+end;
+
+{*****************************************************************************************}
+procedure ALCheckWinApiNTStatus(const AStatus: NTSTATUS; const AModuleHandle: HMODULE = 0);
+begin
+  ALCheckWinApiNTStatus(''{AExtraInfo}, AStatus, AModuleHandle);
+end;
+
+{******************************************************************************************************}
+procedure ALCheckWinApiSecurityStatus(const AStatus: SECURITY_STATUS; const AModuleHandle: HMODULE = 0);
+begin
+  ALCheckWinApiSecurityStatus(''{AExtraInfo}, AStatus, AModuleHandle);
 end;
 
 {****************************************************************************************}

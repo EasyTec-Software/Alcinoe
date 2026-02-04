@@ -64,17 +64,9 @@ begin
         if (LSkipDepth = 1) and
            ( (ALPosIgnoreCaseA('#else', LTrim) = 1) or
              (ALPosIgnoreCaseA('#elif', LTrim) = 1) ) then begin
-          If LInverse then begin
-            LOut.Add(LLine);      // keep the #else / #elif line itself
-            LIgnoreLine := not LIgnoreLine;
-            Continue;
-          end
-          else begin
-            Dec(LSkipDepth);      // stop skipping
-            LOut.Add(LLine);      // keep the #else / #elif line itself
-            LIgnoreLine := not LIgnoreLine;
-            Continue;
-          end;
+          LOut.Add(LLine);      // keep the #else / #elif line itself
+          LIgnoreLine := not LIgnoreLine;
+          Continue;
         end;
 
         // Nested #if inside the skipped block
@@ -955,7 +947,7 @@ begin
           //
           // This wrapper was automagically generated from ImageMagick version 7.1.2-8
           // using Alcinoe\Tools\ImageMagickWrapperGenerator\.
-          // DLLs: /Libraries/dll/imagemagick
+          // DLLs: /Libraries/dll/ImageMagick
           //
           // IMPORTANT:
           // Whenever the ImageMagick version is updated, this unit must be regenerated

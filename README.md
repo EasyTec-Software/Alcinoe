@@ -106,6 +106,7 @@ forced to apply patches to the original Delphi source files:
 * [Architectural Issues in FMX.Skia.Canvas.GL](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-1541)
 * [FMX.VirtualKeyboard.Android: Unused variable and unnecessary logic in Delphi 13 update](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4311)
 * [Project option to define where to look/create the LaunchScreen.TemplateiOS directory](https://quality.embarcadero.com/browse/RSP-33503)
+* [Support configuration-specific deployment templates (AndroidManifest / Info.plist / Entitlements)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4922)
 * [Replace Pointer-based signatures in iOS/macOS bridges with strongly typed wrappers](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4433)
 * [Performance Issue - Comparing Equality Between Two Strings](https://quality.embarcadero.com/browse/RSP-42011)
 * [Allow linking of Swift compatibility frameworks](https://quality.embarcadero.com/browse/RSP-38700)
@@ -143,6 +144,7 @@ forced to apply patches to the original Delphi source files:
 * [Missing Functions in Macapi.QuartzCore.pas](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4346)
 * [macOS: Add missing NSTextField APIs (delegate getter/setter + placeholder getters/setter)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4353)
 * [iOS vs macOS mismatch in CGImageDestinationFinalize declaration (Boolean vs Integer return type)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4714)
+* [Delphi language enhancement: allow multiple inline variant parts inside records (not only trailing)](https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-4920)
 
 
 Install Alcinoe
@@ -886,16 +888,40 @@ With **TALColorAdjustEffect**, you can effortlessly apply stunning
 photo filters to enhance your images with just a single tap. 
 Transform your photos into beautiful and expressive works of art in minutes! 
 
-Learn more at [Demos\ALFmxFilterEffects](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxFilterEffects)
-
 <p align="left">
   <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/imagefilter1.jpg?raw=true" width="320" style="width:320px;"/>
   &nbsp;&nbsp;&nbsp;
   <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/imagefilter2.jpg?raw=true" width="320" style="width:320px;"/>
 </p>
+  
+Learn more at [Demos\ALFmxFilterEffects](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALFmxFilterEffects)
+<br/>
 <br/>
   
-  
+
+Native HTTP Client (WinHTTP)
+============================  
+
+Designed for robust and secure HTTP communication, `TALWinHttpClient` is a Delphi
+HTTP client component built directly on top of the native **WinHTTP** API provided
+by Windows. By relying on the operating system’s integrated networking and security
+stack, it delivers production-grade reliability, performance, and compatibility
+without requiring any external libraries or additional DLLs to be deployed.
+
+`TALWinHttpClient` supports modern web standards with **HTTP/1.1, HTTP/2, and HTTP/3
+(where supported by the underlying Windows WinHTTP stack)**, along with secure
+communication via **TLS 1.2 and TLS 1.3**, automatically negotiating the best
+protocol versions and cipher suites supported by both client and server according
+to Windows security policy. It transparently handles connection management,
+redirects, proxies, authentication, and secure transports, making it well suited
+for REST APIs, RPC services, and high-reliability HTTP integrations that require
+native Windows behavior and long-term maintainability.
+
+Learn more at [Demos\ALWinHTTPClient](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALWinHTTPClient)
+<br/>
+<br/>
+
+
 High-Performance HTTP Server (http.sys)
 =======================================
 
@@ -907,6 +933,8 @@ and security without requiring an external web server. With
 TALHttpSysServer, you can build lightweight yet powerful REST APIs, 
 RPC services, or custom HTTP applications while letting the Windows 
 kernel handle the heavy lifting.
+
+<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/http3.png?raw=true" width="540" style="width:540px;"/>
 
 Advantages of using http.sys:
 
@@ -931,6 +959,58 @@ Learn more at [Demos\ALHttpServer](https://github.com/MagicFoundation/Alcinoe/tr
 <br/>
 <br/>
 
+
+TLS Socket Client (SChannel)
+============================
+
+<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/tsl_1_3.webp?raw=true" width="540" style="width:540px;"/>
+
+`TAlSChannelTlsClient` is a high-performance TLS socket client component for
+Delphi that runs directly on top of the Windows **SChannel** security package,
+the native TLS/SSL implementation built into the Windows operating system.
+By leveraging the same kernel-integrated cryptographic stack used by Windows,
+IIS, WinHTTP, and .NET, it provides production-grade security, compatibility,
+and performance without requiring any external libraries or DLLs, with **no
+external dependencies** such as OpenSSL or third-party components and no
+redistribution or licensing concerns.
+
+`TAlSChannelTlsClient` transparently upgrades an existing TCP socket to TLS
+and handles encryption, decryption, handshake, renegotiation, and shutdown
+entirely through the Windows SSPI/SChannel APIs. It supports **TLS 1.2 and
+TLS 1.3**, automatically negotiating the best protocol version supported by
+both client and server in accordance with Windows security policy, and is
+designed for building robust SMTP, HTTPS, WebSocket, or custom protocol
+clients where full control over the transport layer is required.
+
+Learn more at [Demos\ALTSLClient](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALTSLClient)
+<br/>
+<br/>
+
+
+Secure SMTP Client (TLS 1.2 / TLS 1.3)
+======================================
+    
+<img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/smtp.webp?raw=true" width="540" style="width:540px;"/>
+    
+Designed for reliable and secure email delivery, `TALSMTPClient` is a Delphi
+SMTP client component that sends messages directly over the SMTP protocol
+while leveraging the native Windows TLS stack for transport security. By
+relying on the operating system’s integrated security infrastructure, it
+provides production-grade reliability, security, and compatibility without
+requiring any external libraries or additional DLLs to be deployed.
+
+`TALSMTPClient` supports modern email security requirements with full
+**TLS 1.2 and TLS 1.3** support, automatically negotiating the best protocol
+version supported by both client and server in accordance with Windows
+security policy. It works seamlessly with the **Multipart Alternative** and
+**Multipart Mixed** encoders, enabling the creation of emails with plain-text
+and HTML alternatives as well as file attachments, while giving developers
+full control over the SMTP session and message composition.
+
+Learn more at [Demos\ALSMTPClient](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALSMTPClient)
+<br/>
+<br/>
+  
 
 Json Parser
 ===========
@@ -1003,7 +1083,7 @@ Example :
 
 ```
     //Create the ImageMagick Library
-    ALCreateImageMagickLibrary({alcinoe} + '\Libraries\dll\imagemagick\win32\imagemagick');
+    ALCreateImageMagickLibrary({alcinoe} + '\Libraries\dll\ImageMagick\Win64');
     try
     
       //create the wand pointer
@@ -1040,7 +1120,7 @@ Learn more at [Demos\ALImageMagick](https://github.com/MagicFoundation/Alcinoe/t
 <br/>
 
 
-MongoDb client
+MongoDb Client
 ==============
 
 <img src="https://github.com/MagicFoundation/Alcinoe/blob/master/References/DocImages/mongodb.webp?raw=true"  width="600" style="width:600px;"/>
@@ -1079,48 +1159,6 @@ a fully **Ansi** string list, optimized for performance.
 
 You can start exploring this feature with the demo located at 
 [Demos\ALSortedListBenchmark](https://github.com/MagicFoundation/Alcinoe/tree/master/Demos/ALSortedListBenchmark)
-<br/>
-<br/>
-  
-
-Memcached Client
-================
-
-**What is Memcached?** Memcached is a free, open-source, 
-high-performance, distributed memory object caching system. 
-It is generic in nature but is primarily used to speed up 
-dynamic web applications by reducing database load. By 
-caching frequently accessed data in memory, Memcached helps 
-improve the performance and scalability of applications.
-
-Learn more at [Source/Alcinoe.MemCached.Client.pas](https://github.com/MagicFoundation/Alcinoe/tree/master/Source/Alcinoe.MemCached.Client.pas)
-<br/>
-<br/>
-  
-
-SQLite3 Client
-==============
-
-The **SQLite3 Client** for Delphi allows you to query an 
-**SQLite3** database and retrieve the results in multiple 
-formats, including **XML**, **JSON**, and **BSON**. 
-This flexibility makes it ideal for applications that 
-require data exchange in different formats, enabling 
-smooth integration with various systems and APIs.
-
-Learn more at [Source/Alcinoe.Sqlite3.Client.pas](https://github.com/MagicFoundation/Alcinoe/tree/master/Source/Alcinoe.Sqlite3.Client.pas)
-<br/>
-<br/>
-  
-
-And Much More
-=============
-
-* HTTP Client (WinHTTP)
-* POP3 Client
-* SMTP Client
-* Xml Parser 
-* Etc ...
 <br/>
 <br/>
 
@@ -1165,6 +1203,26 @@ undesired conversions.
 
 History
 =======
+
+## 20/01/2026 – Networking & Messaging Stack Modernization
+
+- Added **TAlSChannelTlsClient** (native Windows SChannel TLS 1.2 / 1.3 support)
+- Added **TALWinSocketClient**
+- Added service management helpers:
+  - `ALInstallService`
+  - `ALUninstallService`
+  - `ALStartService`
+  - `ALStopService`
+  - `ALStartServiceCtrlDispatcher`  
+  to fully manage Windows services
+- Archived `Alcinoe.Winsock.pas` (functions moved to `Alcinoe.Net`)
+- Renamed `Alcinoe.Winapi.HttpApi` to `Alcinoe.Winapi.Http`
+- Rebuilt **TALSMTPClient** with native **TLS 1.2 / TLS 1.3** support
+- Added **TALMultipartMixedEncoderA** and **TALMultipartAlternativeEncoderA**
+- Renamed and rebuilt **TALEMailHeadersA** to **TALMailHeadersA**
+- Archived `Alcinoe.Sqlite3.Client` and `Alcinoe.Sqlite3.Wrapper`
+- Archived `Alcinoe.POP3.Client`
+- Archived `Alcinoe.MemCached.Client`
 
 ## 24/12/2025 – Versioning Alignment, API Additions & Behavior Updates
 
