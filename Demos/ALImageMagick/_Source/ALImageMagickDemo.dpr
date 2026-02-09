@@ -9,7 +9,7 @@ uses
   System.StrUtils,
   System.Rtti,
   System.TypInfo,
-  Alcinoe.Files,
+  Alcinoe.FileUtils,
   Alcinoe.ImageMagick;
 
 type
@@ -334,9 +334,9 @@ end;
 procedure Kickoff;
 begin
   {$IF defined(Win64)}
-  ALCreateImageMagickLibrary(ALGetModulePathW + '..\..\..\..\Libraries\dll\imagemagick\win64');
+  ALCreateImageMagickLibrary(ALGetModulePathW + '..\..\..\..\Libraries\dll\ImageMagick\Win64');
   {$ELSE}
-  ALCreateImageMagickLibrary(ALGetModulePathW + '..\..\..\..\Libraries\dll\imagemagick\win32');
+  ALCreateImageMagickLibrary(ALGetModulePathW + '..\..\..\..\Libraries\dll\ImageMagick\Win32');
   {$ENDIF}
   try
 

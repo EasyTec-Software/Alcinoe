@@ -59,7 +59,6 @@ uses
   Alcinoe.AndroidApi.Os,
   Alcinoe.AndroidApi.RenderScript,
   Alcinoe.AndroidApi.Security,
-  Alcinoe.AndroidApi.VKontakte,
   Alcinoe.AndroidApi.WebKit,
   Alcinoe.AndroidApi.Widget,
   Alcinoe.Androidapi.GraphicsContentViewText,
@@ -79,14 +78,8 @@ uses
   Alcinoe.iOSApi.MessageUI,
   Alcinoe.iOSApi.Photos,
   Alcinoe.iOSapi.PhotosUI,
-  {$IFNDEF IOSSIMULATOR}
-  Alcinoe.iOSApi.VKontakte,
-  {$ENDIF}
   Alcinoe.iOSapi.CoreFoundation,
   Alcinoe.iOSapi.CoreVideo,
-  {$ENDIF}
-  {$IFNDEF IOSSIMULATOR}
-  Alcinoe.FMX.VKontakte,
   {$ENDIF}
   {$IFDEF ALMacOS}
   Alcinoe.FMX.NativeView.Mac,
@@ -144,7 +137,7 @@ uses
   Alcinoe.FMX.UserPreferences,
   Alcinoe.FMX.VideoPlayer,
   Alcinoe.FMX.WebBrowser,
-  Alcinoe.Files,
+  Alcinoe.FileUtils,
   Alcinoe.GuardianThread,
   Alcinoe.HTML,
   Alcinoe.HTTP,
@@ -170,7 +163,6 @@ uses
   Grijjy.SymbolTranslator,
   {$IFDEF MSWINDOWS}
   ALDUnitXTestStringUtils in 'ALDUnitXTestStringUtils.pas',
-  ALDUnitXTestCipher in 'ALDUnitXTestCipher.pas',
   ALDUnitXTestHtml in 'ALDUnitXTestHtml.pas',
   {$ENDIF}
   System.SysUtils,

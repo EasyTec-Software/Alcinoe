@@ -1,5 +1,6 @@
 __history
 __recovery
+_ReleaseNotes.txt
 *.deployproj.local
 *.dproj.local
 *.groupproj.local
@@ -7,6 +8,7 @@ __recovery
 *.exe
 *.res
 *.rsm
+*.cmds
 Dcu
 /Compiled/*
 /Demos/**/Android/Debug*
