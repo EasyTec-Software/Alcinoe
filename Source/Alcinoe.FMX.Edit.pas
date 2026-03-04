@@ -5141,12 +5141,13 @@ procedure TALBaseEdit.SetText(const Value: String);
 begin
   if NativeView <> nil then begin
     NativeView.Text := Value;
+    if not Enabled then
+      ClearBufPromptTextDrawable;
     UpdateNativeViewVisibility;
   end
   else begin
     FDummyText := Value;
     ClearBufPromptTextDrawable;
-    ClearBufLabelTextDrawable;
     repaint;
   end;
 end;
