@@ -4262,6 +4262,7 @@ begin
     if FOwnsResourceStream then
       ALFreeAndNil(FResourceStream);
     FResourceStream := Value;
+    FOwnsResourceStream := True;
     Change;
   end;
 end;
@@ -7077,7 +7078,7 @@ initialization
   _RenderScript := nil;
   {$ENDIF}
   ALFontMetricsCache := TDictionary<TALFontMetricsKey, TALFontMetrics>.Create;
-  //ALFontMetricsCacheLock := ??; their is no TLightweightMREW.create but instead an ugly class operator TLightweightMREW.Initialize :(
+  //ALFontMetricsCacheLock := ?? There is no TLightweightMREW.Create; initialization is done through the TLightweightMREW.Initialize class operator instead
   {$IF (not defined(ALSkiaEngine)) and (defined(Android))}
   TALFontManager.FCustomTypeFaces := TDictionary<String, JTypeFace>.Create;
   {$ENDIF}

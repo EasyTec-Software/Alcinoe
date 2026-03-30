@@ -76,23 +76,21 @@ Const
 
 type
 
-  TALStringStreamA = class(TStream)
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if System.classes.TStringStream is still the same and adjust the IFDEF'}
+    {$MESSAGE WARN 'Check if System.classes.TBytesStream is still the same and adjust the IFDEF'}
+    {$MESSAGE WARN 'Check if System.classes.TMemoryStream is still the same and adjust the IFDEF'}
+    {$MESSAGE WARN 'Check if System.classes.TCustomMemoryStream is still the same and adjust the IFDEF'}
+  {$ENDIF}
+  TALStringStreamA = class(TMemoryStream)
   private
     FDataString: AnsiString;
-    FPosition: Integer;
     procedure SetDataString(const AValue: AnsiString);
   protected
-    function GetSize: Int64; override;
-    procedure SetSize(NewSize: Longint); override;
-    procedure SetSize(const NewSize: Int64); override;
+    function Realloc(var NewCapacity: NativeInt): Pointer; override;
   public
     constructor Create(const AString: AnsiString);
-    procedure LoadFromStream(Stream: TStream);
-    procedure LoadFromFile(const FileName: string);
-    function Read(var Buffer; Count: Longint): Longint; override;
     function ReadString(Count: Longint): AnsiString;
-    function Seek(Offset: Longint; Origin: Word): Longint; override;
-    function Write(const Buffer; Count: Longint): Longint; override;
     procedure WriteString(const AString: AnsiString);
     property DataString: AnsiString read FDataString write SetDataString;
   end;
@@ -231,6 +229,14 @@ type
     property MaxCapacity: Integer read GetMaxCapacity;
   end;
 
+/// <summary>
+///   Converts an AnsiString to a TBytes without copying the underlying data.
+///   The returned TBytes shares the same memory block as the source AnsiString.
+///   It must be treated as read-only, must not be modified or resized, and must
+///   later be reverted back to an AnsiString using ALRevertBytesToString.
+/// </summary>
+function  ALConvertStringToBytes(const AStr: AnsiString; out ACodePage: Word; out AElemSize: Word): TBytes;
+procedure ALRevertBytesToString(var ABytes: TBytes; const ACodePage: Word; const AElemSize: Word);
 Function  ALNewGUIDBytes: TBytes;
 function  ALGUIDToByteString(const Guid: TGUID): Ansistring;
 function  ALNewGUIDByteString: Ansistring;
@@ -343,14 +349,17 @@ function  ALIntToHexW(Value: Integer; Digits: Integer): String; inline; overload
 function  ALIntToHexW(Value: Int64; Digits: Integer): String; inline; overload;
 function  ALIntToHexW(Value: UInt64; Digits: Integer): String; inline; overload;
 function  ALTryBinToHex(const aBin: AnsiString; out Value: AnsiString): boolean; overload;
+function  ALTryBinToHex(const aBin: TBytes; out Value: AnsiString): boolean; overload;
 function  ALTryBinToHex(const aBin; aBinSize : Cardinal; out Value: AnsiString): boolean; overload;
 function  ALTryBinToHex(const aBin: Tbytes; out Value: String): boolean; overload;
 function  ALTryBinToHex(const aBin; aBinSize : Cardinal; out Value: String): boolean; overload;
 function  ALBinToHexA(const aBin: AnsiString): AnsiString; overload;
+function  ALBinToHexA(const aBin: TBytes): AnsiString; overload;
 Function  ALBinToHexA(const aBin; aBinSize : Cardinal): AnsiString; overload;
 Function  ALBinToHexW(const aBin: Tbytes): String; overload;
 Function  ALBinToHexW(const aBin; aBinSize : Cardinal): String; overload;
 Function  ALTryHexToBin(const aHex: AnsiString; out Value: AnsiString): boolean; overload;
+Function  ALTryHexToBin(const aHex: AnsiString; out Value: TBytes): boolean; overload;
 Function  ALTryHexToBin(const aHex: String; out Value: Tbytes): boolean; overload;
 Function  ALHexToBin(const aHex: AnsiString): AnsiString; overload;
 Function  ALHexToBin(const aHex: String): Tbytes; overload;
@@ -366,9 +375,12 @@ function  ALBase64EncodeStringMIME(const S: AnsiString): AnsiString;
 function  ALBase64DecodeStringMIME(const S: AnsiString): AnsiString;
 function  ALURLBase64EncodeString(const S: AnsiString; const aDoOnlyUrlEncode: boolean = false): AnsiString;
 function  ALURLBase64DecodeString(const S: AnsiString; const aDoOnlyUrlDecode: boolean = false): AnsiString;
+Function  ALBase64EncodeBytesA(const Bytes: Tbytes): AnsiString; overload;
+Function  ALBase64EncodeBytesA(const Bytes: pointer; const Size: Integer): AnsiString; overload;
 Function  ALBase64EncodeBytesW(const Bytes: Tbytes): String; overload;
 Function  ALBase64EncodeBytesW(const Bytes: pointer; const Size: Integer): String; overload;
-Function  ALBase64DecodeBytes(const S: String): Tbytes;
+Function  ALBase64DecodeBytes(const S: AnsiString): Tbytes; overload;
+Function  ALBase64DecodeBytes(const S: String): Tbytes; overload;
 function  ALIsAlphaString(const S: AnsiString): Boolean; overload;
 function  ALIsAlphaString(const S: string): Boolean; overload;
 function  ALIsAlphaNumeric(const S: AnsiString): Boolean; overload;
@@ -497,8 +509,16 @@ function  ALExcludeLeadingPathDelimiterA(const S: AnsiString; const PathDelimite
 function  ALExcludeLeadingPathDelimiterW(const S: String; const PathDelimiter: String = {$IFDEF MSWINDOWS} '\' {$ELSE} '/' {$ENDIF}): String; overload;
 procedure ALStrMove(const Source: PAnsiChar; var Dest: PAnsiChar; Count: NativeInt); overload; inline;
 procedure ALStrMove(const Source: PChar; var Dest: PChar; Count: NativeInt); overload; inline;
+/// <summary>
+///   AStart is zero-based.
+/// </summary>
+function  ALCopyStr(const aSourceString: TBytes; aStart, aLength: Integer): AnsiString; overload;
 function  ALCopyStr(const aSourceString: AnsiString; aStart, aLength: Integer): AnsiString; overload;
 function  ALCopyStr(const aSourceString: String; aStart, aLength: Integer): String; overload;
+/// <summary>
+///   AStart is zero-based.
+/// </summary>
+procedure ALCopyStr(const aSourceString: TBytes; var aDestString: ansiString; aStart, aLength: Integer); overload;
 procedure ALCopyStr(const aSourceString: AnsiString; var aDestString: ansiString; aStart, aLength: Integer); overload;
 procedure ALCopyStr(const aSourceString: String; var aDestString: String; aStart, aLength: Integer); overload;
 function  ALCopyStr(
@@ -732,31 +752,61 @@ uses
   System.Character,
   System.Math;
 
+type
+
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if System.StrRec is still the same and adjust the IFDEF'}
+  {$ENDIF}
+  PStrRec = ^StrRec;
+  StrRec = packed record
+  {$IF defined(CPU64BITS)}
+    _Padding: Integer; // Make 16 byte align for payload..
+  {$ENDIF}
+    codePage: Word;
+    elemSize: Word;
+    refCnt: Integer;
+    length: Integer;
+  end;
+
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if System.TDynArrayRec is still the same and adjust the IFDEF'}
+  {$ENDIF}
+  PDynArrayRec = ^TDynArrayRec;
+  TDynArrayRec = packed record
+  {$IFDEF CPU64BITS}
+    _Padding: Integer; // Make 16 byte align for payload..
+  {$ENDIF}
+    RefCnt: Integer;
+    Length: NativeInt;
+  end;
+
+Type
+
+  {*************************************}
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if System.classes.TMemoryStream is still the same and adjust the IFDEF'}
+  {$ENDIF}
+  _TALMemoryStreamPrivateAccess = class(TCustomMemoryStream)
+  public
+    FCapacity: NativeInt;
+  end;
+
 {*************************************************************}
 constructor TALStringStreamA.Create(const AString: AnsiString);
 begin
   inherited Create;
-  FDataString := AString;
+  SetDataString(AString);
 end;
 
-{*********************************************************}
-procedure TALStringStreamA.LoadFromStream(Stream: TStream);
+{*********************************************************************}
+function TALStringStreamA.Realloc(var NewCapacity: NativeInt): Pointer;
 begin
-  Stream.Position := 0;
-  var LCount := Stream.Size;
-  SetSize(LCount);
-  if LCount <> 0 then
-    Stream.ReadBuffer(PAnsiChar(FDataString)^, LCount);
-end;
-
-{**************************************************************}
-procedure TALStringStreamA.LoadFromFile(const FileName: string);
-begin
-  var LFileStream := TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-  try
-    LoadFromStream(LFileStream);
-  finally
-    ALFreeAndNil(LFileStream);
+  Result := Pointer(FDataString);
+  if NewCapacity <> Capacity then begin
+    SetLength(FDataString, NewCapacity);
+    Result := Pointer(FDataString);
+    if NewCapacity = 0 then Exit;
+    if Result = nil then raise EStreamError.CreateRes(@SMemoryStreamError);
   end;
 end;
 
@@ -764,86 +814,64 @@ end;
 procedure TALStringStreamA.SetDataString(const AValue: AnsiString);
 begin
   FDataString := AValue;
-  FPosition := 0;
-end;
-
-{******************************************************************}
-function TALStringStreamA.Read(var Buffer; Count: Longint): Longint;
-begin
-  Result := Length(FDataString) - FPosition;
-  if Result > Count then Result := Count;
-
-  // a little modification from the original TStringStream
-  // because in original we will have a call to uniqueString on FDataString :(
-  // https://forums.embarcadero.com/thread.jspa?threadID=119103
-  // ALMove(PAnsiChar(@FDataString[FPosition + SizeOf(AnsiChar)])^, Buffer, Result * SizeOf(AnsiChar));
-  ALMove(Pbyte(FDataString)[FPosition], Buffer, Result * SizeOf(AnsiChar));
-
-  Inc(FPosition, Result);
-end;
-
-{*********************************************************************}
-function TALStringStreamA.Write(const Buffer; Count: Longint): Longint;
-begin
-  Result := Count;
-
-  // a little modification from the original TStringStream
-  // because in original it's crazy we can not update part inside the datastring !!
-  // SetLength(FDataString, (FPosition + Result));
-  if FPosition + Result > length(FDataString) then SetLength(FDataString, (FPosition + Result));
-
-  ALMove(Buffer, PAnsiChar(@FDataString[FPosition + SizeOf(AnsiChar)])^, Result * SizeOf(AnsiChar));
-  Inc(FPosition, Result);
-end;
-
-{*********************************************************************}
-function TALStringStreamA.Seek(Offset: Longint; Origin: Word): Longint;
-begin
-  case Origin of
-    soFromBeginning: FPosition := Offset;
-    soFromCurrent: FPosition := FPosition + Offset;
-    soFromEnd: FPosition := Length(FDataString) - Offset;
-  end;
-  if FPosition > Length(FDataString) then
-    FPosition := Length(FDataString)
-  else if FPosition < 0 then FPosition := 0;
-  Result := FPosition;
+  SetPointer(Pointer(FDataString), Length(FDataString));
+  _TALMemoryStreamPrivateAccess(Self).FCapacity := length(FDataString){FSize};
+  Position := 0;
 end;
 
 {***************************************************************}
 function TALStringStreamA.ReadString(Count: Longint): AnsiString;
-var
-  Len: Integer;
 begin
-  Len := Length(FDataString) - FPosition;
-  if Len > Count then Len := Count;
-  SetString(Result, PAnsiChar(@FDataString[FPosition + SizeOf(AnsiChar)]), Len);
-  Inc(FPosition, Len);
+  var LPosition: int64 := Position;
+  if Count > Length(FDataString){Size} - LPosition then
+    Count := Length(FDataString){Size} - LPosition;
+  SetString(Result, PAnsiChar(@FDataString[LPosition + SizeOf(AnsiChar)]), Count);
+  Position := LPosition + Count;
 end;
 
 {****************************************************************}
 procedure TALStringStreamA.WriteString(const AString: AnsiString);
 begin
-  Write(PAnsiChar(AString)^, Length(AString));
+  Write(pointer(AString)^, Length(AString));
 end;
 
-{***************************************}
-function TALStringStreamA.GetSize: Int64;
+{*********************************************************************************************************}
+function  ALConvertStringToBytes(const AStr: AnsiString; out ACodePage: Word; out AElemSize: Word): TBytes;
 begin
-  Result := length(FDataString);
+  if Pointer(AStr) = nil then begin
+    Result := nil;
+    Exit;
+  end;
+
+  var LStrRec: PStrRec := PStrRec(PByte(Pointer(AStr)) - SizeOf(StrRec));
+  var LLength: Integer := LStrRec.Length;
+  var LrefCnt: Integer := LStrRec.refCnt;
+  ACodePage := LStrRec.codePage;
+  AElemSize := LStrRec.elemSize;
+
+  var LDynArrayRec: PDynArrayRec := PDynArrayRec(PByte(Pointer(AStr)) - SizeOf(TDynArrayRec));
+  LDynArrayRec.Length := LLength;
+  LDynArrayRec.RefCnt := LrefCnt;
+
+  Pointer(Result) := Pointer(AStr);
 end;
 
-{***************************************************}
-procedure TALStringStreamA.SetSize(NewSize: Longint);
+{************************************************************************************************}
+procedure ALRevertBytesToString(var ABytes: TBytes; const ACodePage: Word; const AElemSize: Word);
 begin
-  SetSize(Int64(NewSize));
-end;
+  if Pointer(ABytes) = nil then exit;
 
-{*******************************************************}
-procedure TALStringStreamA.SetSize(const NewSize: Int64);
-begin
-  SetLength(FDataString, NewSize);
-  if FPosition > NewSize then FPosition := NewSize;
+  var LDynArrayRec: PDynArrayRec := PDynArrayRec(PByte(Pointer(ABytes)) - SizeOf(TDynArrayRec));
+  var LLength: Integer := LDynArrayRec.Length;
+  var LrefCnt: Integer := LDynArrayRec.refCnt;
+
+  var LStrRec: PStrRec := PStrRec(PByte(Pointer(ABytes)) - SizeOf(StrRec));
+  LStrRec.Length := LLength;
+  LStrRec.refCnt := LrefCnt;
+  LStrRec.codePage := ACodePage;
+  LStrRec.elemSize := AElemSize;
+
+  Pointer(ABytes) := nil;
 end;
 
 {*******************************}
@@ -5560,6 +5588,18 @@ begin
   result := true;
 end;
 
+{**************************************************************************}
+Function  ALTryBinToHex(const aBin: TBytes; out Value: AnsiString): boolean;
+begin
+  if length(aBin) = 0 then exit(false);
+  setlength(Value,length(aBin) * 2);
+  _ALBinToHex(
+    PByte(@aBin[low(aBin)]),
+    PByte(@Value[low(Value)]),
+    length(aBin));
+  result := true;
+end;
+
 {***************************************************************************************}
 Function  ALTryBinToHex(const aBin; aBinSize : Cardinal; out Value: AnsiString): boolean;
 begin
@@ -5607,6 +5647,13 @@ begin
     raise Exception.Create('Bad binary value');
 end;
 
+{****************************************************}
+Function  ALBinToHexA(const aBin: TBytes): AnsiString;
+begin
+  if not ALTryBinToHex(aBin, Result) then
+    raise Exception.Create('Bad binary value');
+end;
+
 {*****************************************************************}
 Function  ALBinToHexA(const aBin; aBinSize : Cardinal): AnsiString;
 begin
@@ -5636,6 +5683,16 @@ begin
   if (l = 0) or (l mod 2 <> 0) then exit(False);
   setlength(Value,l div 2);
   result := HexToBin(PansiChar(aHex),pansiChar(Value),length(Value)) = l div 2;
+end;
+
+{**************************************************************************}
+Function  ALTryHexToBin(const aHex: AnsiString; out Value: TBytes): boolean;
+var l: integer;
+begin
+  l := length(aHex);
+  if (l = 0) or (l mod 2 <> 0) then exit(False);
+  setlength(Value,l div 2);
+  result := HexToBin(PansiChar(aHex),pbyte(Value),length(Value)) = l div 2;
 end;
 
 {**********************************************************************}
@@ -5876,8 +5933,8 @@ begin
   result := (len shr 2)*3-result;
 end;
 
-{*************************************************************************************}
-function Base64ToBinSafe(sp: PAnsiChar; len: NativeInt; var data: AnsiString): boolean;
+{***********************************************************************************************}
+function Base64ToBinSafe(sp: PAnsiChar; len: NativeInt; var data: AnsiString): boolean; overload;
 var resultLen: NativeInt;
 begin
   resultLen := Base64ToBinLength(sp,len);
@@ -5893,6 +5950,26 @@ begin
   end else begin
     result := false;
     data := '';
+  end;
+end;
+
+{*******************************************************************************************}
+function Base64ToBinSafe(sp: PAnsiChar; len: NativeInt; var data: Tbytes): boolean; overload;
+var resultLen: NativeInt;
+begin
+  resultLen := Base64ToBinLength(sp,len);
+  if resultLen<>0 then begin
+    Setlength(data,resultLen);
+    if ConvertBase64ToBin[sp[len-2]]>=0 then
+      if ConvertBase64ToBin[sp[len-1]]>=0 then else
+        dec(len) else
+        dec(len,2); // adjust for Base64AnyDecode() algorithm
+    result := Base64AnyDecode(ConvertBase64ToBin,sp,pointer(data),len);
+    if not result then
+      data := nil;
+  end else begin
+    result := false;
+    data := nil;
   end;
 end;
 
@@ -6047,6 +6124,28 @@ begin
   result := ALBase64DecodeString(result);
 end;
 
+{**************************************************************}
+Function  ALBase64EncodeBytesA(const Bytes: Tbytes): AnsiString;
+var len: integer;
+begin
+  result := '';
+  len := length(Bytes);
+  if len=0 then
+    exit;
+  SetString(result,nil,BinToBase64Length(len));
+  Base64Encode(pointer(result),pointer(Bytes),len);
+end;
+
+{************************************************************************************}
+Function  ALBase64EncodeBytesA(const Bytes: pointer; const Size: Integer): AnsiString;
+begin
+  result := '';
+  if Size=0 then
+    exit;
+  SetString(result,nil,BinToBase64Length(Size));
+  Base64Encode(pointer(result),Bytes,Size);
+end;
+
 {**********************************************************}
 Function  ALBase64EncodeBytesW(const Bytes: Tbytes): String;
 begin
@@ -6057,6 +6156,14 @@ end;
 Function  ALBase64EncodeBytesW(const Bytes: pointer; const Size: Integer): String;
 begin
   result := _GetBase64Encoding.EncodeBytesToString(Bytes, Size);
+end;
+
+{*********************************************************}
+Function  ALBase64DecodeBytes(const S: AnsiString): Tbytes;
+begin
+  if S='' then exit(nil);
+  if not Base64ToBinSafe(pointer(s),length(s),result) then
+    raise Exception.Create(sInvalidbase64String);
 end;
 
 {*****************************************************}
@@ -8074,14 +8181,56 @@ end;
 
 {******************************************************}
 function  ALSameStrA(const S1, S2: AnsiString): Boolean;
+label
+  BothStringsNonNil, FoundMismatch;
+var
+  Int: Integer;
+  LPtr, RPtr: PByte;
+  i: NativeInt;
 begin
-  result := System.Ansistrings.SameStr(S1, S2);
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if system._UStrEqual is still the same and adjust the IFDEF'}
+    {$MESSAGE WARN 'Check if https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-5052 have been implemented and adjust the IFDEF'}
+  {$ENDIF}
+  //result := System.Ansistrings.SameStr(S1, S2);
+
+  LPtr := Pointer(S1);
+  RPtr := Pointer(S2);
+  if LPtr <> RPtr then
+  begin
+    if NativeUInt(LPtr) and NativeUInt(RPtr) <> 0 then
+    begin
+BothStringsNonNil:
+      Int := PInteger(LPtr - 4)^;
+      if Int <> PInteger(RPtr - 4)^ then
+        goto FoundMismatch;
+      i := Int * -1;
+      LPtr := LPtr - i;
+      RPtr := RPtr - i;
+      Dec(i, (4 - (Int and 3)) and 3);
+      repeat
+        if PInteger(@LPtr[i])^ <> PInteger(@RPtr[i])^ then
+          goto FoundMismatch;
+        Inc(i, 4);
+      until i >= 0;
+    end
+    else if (LPtr <> nil) and (RPtr <> nil) then
+      goto BothStringsNonNil
+    else
+FoundMismatch:
+      Exit(False);
+  end;
+  Result := True;
 end;
 
 {**************************************************}
 function  ALSameStrW(const S1, S2: string): Boolean;
 begin
-  result := system.sysutils.SameStr(S1, S2);
+  {$IFNDEF ALCompilerVersionSupported130}
+    {$MESSAGE WARN 'Check if https://embt.atlassian.net/servicedesk/customer/portal/1/RSS-5052 have been implemented and adjust the IFDEF'}
+  {$ENDIF}
+  //result := system.sysutils.SameStr(S1, S2);
+  result := S1 = S2;
 end;
 
 {**********************************************************}
@@ -8472,6 +8621,26 @@ begin
   ALMove(Source^, Dest^, Count * sizeOf(Char));
 end;
 
+{************************************************************************************}
+function ALCopyStr(const aSourceString: TBytes; aStart, aLength: Integer): AnsiString;
+var LSourceStringLn: Integer;
+begin
+  LSourceStringLn := Length(aSourceString);
+  If (aStart < 0) then aStart := 0;
+
+  if (LSourceStringLn=0) or
+     (aLength < 1) or
+     (aStart >= LSourceStringLn) then Begin
+    Result := '';
+    Exit;
+  end;
+
+  aLength := Min(aLength, LSourceStringLn - aStart);
+
+  SetLength(Result,aLength); //  To guarantee that the string is unique, call the SetLength, SetString, or UniqueString procedures
+  ALMove(Pbyte(aSourceString)[aStart], pointer(Result)^, aLength); // pointer(Result)^ to not jump inside uniqueString (aDestString is already unique thanks to previous SetLength))
+end;
+
 {****************************************************************************************}
 function ALCopyStr(const aSourceString: AnsiString; aStart, aLength: Integer): AnsiString;
 var LSourceStringLn: Integer;
@@ -8510,6 +8679,26 @@ begin
 
   SetLength(Result,aLength); //  To guarantee that the string is unique, call the SetLength, SetString, or UniqueString procedures
   ALMove(PChar(aSourceString)[aStart-1], pointer(Result)^, aLength*SizeOf(Char)); // pointer(Result)^ to not jump inside uniqueString (aDestString is already unique thanks to previous SetLength))
+end;
+
+{******************************************************************************************************}
+procedure ALCopyStr(const aSourceString: TBytes; var aDestString: ansiString; aStart, aLength: Integer);
+var LSourceStringLn: Integer;
+begin
+  LSourceStringLn := Length(aSourceString);
+  If (aStart < 0) then aStart := 0;
+
+  if (LSourceStringLn=0) or
+     (aLength < 1) or
+     (aStart >= LSourceStringLn) then Begin
+    aDestString := '';
+    Exit;
+  end;
+
+  aLength := Min(aLength, LSourceStringLn - aStart);
+
+  SetLength(aDestString,aLength); //  To guarantee that the string is unique, call the SetLength, SetString, or UniqueString procedures
+  ALMove(Pbyte(aSourceString)[aStart], pointer(aDestString)^, aLength);  // pointer(aDestString)^ to not jump inside uniqueString (aDestString is already unique thanks to previous SetLength))
 end;
 
 {**********************************************************************************************************}
@@ -8680,12 +8869,11 @@ end;
 
 {**************************************************************}
 function  ALGetBytesFromStream(const aStream : TStream): Tbytes;
-var l: Integer;
 begin
-   l:=aStream.Size-aStream.Position;
-   SetLength(result, l);
-   if L > 0 then
-     aStream.ReadBuffer(result[0], l);
+  AStream.Position := 0;
+  SetLength(result, AStream.Size);
+  if AStream.Size > 0 then
+   aStream.ReadBuffer(pointer(Result)^, AStream.Size);
 end;
 
 {********************************************************************************************************}

@@ -1,3 +1,49 @@
+## 03/26/2026
+
+- Renamed `Alcinoe.Mime.ContentTypes` to `Alcinoe.Mime.Types`
+- Renamed MIME helper functions:
+  - `ALGetDefaultMIMEContentTypeFromExt` to `ALGetDefaultMimeTypeFromExt`
+  - `ALGetDefaultFileExtFromMimeContentType` to `ALGetDefaultFileExtFromMimeType`
+- Changed `TALStringStreamA` to inherit from `TMemoryStream` instead of `TStream`
+- Added `ALStopCurrentService`
+- Updated `ALInstallService`:
+  - default `APreshutdownTimeout` is now `180000`
+  - added `AEnableFailureAutoRestart: Boolean = True`
+  - configured automatic restart on service failure
+- Added success messages to `ALInstallService` and `ALUninstallService`
+- Renamed `TALHttpServerA.MaxBodySize` to `TALHttpServerA.MaxRequestBodySize`
+- Simplified `TALHttpServerHttpSys` worker thread management:
+  - removed `MinWorkerThreadCount`
+  - removed `MaxWorkerThreadCount`
+  - `WorkerThreadCount` is now directly configurable
+- Added Windows version guards before enabling WinHTTP HTTP/2, HTTP/3, and decompression options
+- Optimized parts of `TALJSONNodeA/TALJSONNodeW` JSON/BSON parsing and serialization:
+  - reduced internal buffer sizes from `32768` to `16384`
+  - used `TBufferedFileStream` for JSON/BSON file saves
+  - streamlined direct stream writes in serialization paths
+- Updated `TALMongoDBClient` so JSON payloads remain `AnsiString` and BSON payloads use `TBytes`
+- Added `TBytes` overloads for `TALMongoDBClient.FindAndModify`, `InsertOne`, `InsertMany`, `UpdateOne`, `UpdateMany`, and `ReplaceOne`
+
+## 03/08/2026
+
+- Changed `TALJSONNodeA.BSON` from `AnsiString` to `TBytes`. If you still need the BSON payload as a byte-based AnsiString, use `TALJSONNodeA.SaveToBSONString`
+- Added `poBinaryAsPtrStream` to `TALJSONParseOption`
+- Added `LoadFromBSONBytes` and `ParseBSONBytes` to `TALJSONNodeA/TALJSONDocumentA`
+- Added `GetBinaryAsBytes`, `GetBinaryAsStream`, `SetBinaryAsBytes`, `SetBinaryAsStream`, `GetOwnsBinaryStream`, and `SetOwnsBinaryStream` to `TALJSONNodeA/TALJSONNodeW`
+- Added `GetChildValueBinaryAsBytes`, `GetChildValueBinaryAsStream`, `SetChildValueBinaryAsBytes`, and `SetChildValueBinaryAsStream` to `TALJSONNodeA/TALJSONNodeW`
+- Changed `TALJSONNodeA/TALJSONNodeW.ParseBSON` to use `RawBSONBytes: TBytes` instead of string-based BSON buffers
+- Changed `TALJSONNodeA/TALJSONNodeW.ObjectID` and related getters/setters to use `TBytes` instead of `AnsiString/String`
+- Changed binary handling in `TALJSONNodeA/TALJSONNodeW` from `Binary: AnsiString/String` to `BinaryAsBytes: TBytes` and `BinaryAsStream: TStream`
+- Changed `ALJsonEncodeBinaryWithNodeSubTypeHelperA/W` and `ALJsonEncodeObjectIDWithNodeSubTypeHelperA/W` to use `TBytes`
+- Changed `ALJSONTryStrToBinaryA/W` and `ALJSONTryStrToObjectIDA/W` to return `TBytes`
+- Removed sorted/duplicate/owner support from `TALJSONNodeListA/TALJSONNodeListW`
+- Removed `MultiThreadPrepare`, `NextSibling`, `PreviousSibling`, `ParentNode`, and `NodeValue` from `TALJSONNodeA/TALJSONNodeW`
+- Removed `SetChildNodes` from `TALJSONNodeA/TALJSONNodeW`, `TALJSONObjectNodeA/TALJSONObjectNodeW`, and `TALJSONArrayNodeA/TALJSONArrayNodeW`
+- Removed `ALJSONToXMLA`
+- Removed `ALJsonEncodeWithNodeSubTypeHelperA/W`
+- Removed `TAlJSONParseDocumentW`
+- Added `ALConvertStringToBytes` and `ALRevertBytesToString` to convert an `AnsiString` to `TBytes` without copying the underlying data.
+
 ## 03/02/2026
 
 - Added TALCookedUrlW  
