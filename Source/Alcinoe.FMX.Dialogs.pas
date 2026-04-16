@@ -1449,7 +1449,7 @@ begin
   var LMinDialogContainerWidth: Single := 280;
   // https://m3.material.io/components/dialogs/specs
   // Container width: Min 280dp; Max 560dp
-  var LMaxDialogContainerWidth := min(560, LClientWidth / 100 * 85);
+  var LMaxDialogContainerWidth := max(LMinDialogContainerWidth, min(560, LClientWidth / 100 * 85));
 
   // Update Width/MaxWith of some elements
   if ADialog.HasHeadline then
@@ -1476,6 +1476,59 @@ begin
                      - LEdit.Margins.Right
                      - ADialog.Container.padding.Left
                      - ADialog.Container.padding.Right);
+  end;
+
+  // For TALLayout items containing a button + text pair aligned on the left,
+  // constrain the text MaxWidth so it fits within the dialog container.
+  if ADialog.HasContent then begin
+    For var I := 0 to ADialog.Content.Content.ControlsCount - 1 do begin
+      var LItem := ADialog.Content.Content.Controls[i];
+      if not LItem.Visible then Continue;
+      if LItem Is not TALControl then Continue;
+      If TALControl(LItem).Align not in [TALAlignLayout.Top,
+                                         TALAlignLayout.TopLeft,
+                                         TALAlignLayout.TopCenter,
+                                         TALAlignLayout.TopRight,
+                                         TALAlignLayout.MostTop,
+                                         TALAlignLayout.MostTopLeft,
+                                         TALAlignLayout.MostTopCenter,
+                                         TALAlignLayout.MostTopRight] then Continue;
+      if (LItem.ControlsCount = 2) and
+         (LItem.Controls[0] is TALBaseCheckBox) and
+         (LItem.Controls[1] is TALBaseText) then begin
+        var LButton := LItem.Controls[0];
+        var LText := TALText(LItem.Controls[1]);
+        If LText.Align in [TALAlignLayout.Left,
+                           TALAlignLayout.LeftTop,
+                           TALAlignLayout.LeftCenter,
+                           TALAlignLayout.LeftBottom] then begin
+          LText.MaxWidth := Min(
+                              LText.MaxWidth,
+                              LMaxDialogContainerWidth
+                              - LButton.Margins.Left
+                              - LButton.Width
+                              - LButton.Margins.Right
+                              - LText.Margins.Left
+                              - LText.Margins.Right
+                              - ADialog.Content.Margins.Left
+                              - ADialog.Content.Margins.Right
+                              - ADialog.Container.padding.Left
+                              - ADialog.Container.padding.Right);
+        end;
+      end
+      else if (LItem.ControlsCount = 0) and (LItem is TALBaseText) then begin
+        var LText := TALBaseText(LItem);
+        LText.MaxWidth := Min(
+                            LText.MaxWidth,
+                            LMaxDialogContainerWidth
+                            - LText.Margins.Left
+                            - LText.Margins.Right
+                            - ADialog.Content.Margins.Left
+                            - ADialog.Content.Margins.Right
+                            - ADialog.Container.padding.Left
+                            - ADialog.Container.padding.Right);
+      end
+    end;
   end;
 
   // BeginUpdate was called when the dialog was created.

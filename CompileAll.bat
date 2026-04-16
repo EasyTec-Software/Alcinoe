@@ -227,7 +227,7 @@ echo Update Version Info
 echo -------------------
 echo.
 
-call "%ALBaseDir%\Tools\DProjVersioning\DProjVersioning.exe" -DProj="%ALBaseDir%\Source\Packages\Alcinoe%ALDelphiName%.dproj" -IncVersion -MajorNumber="13" -MinorNumber="0" -CreateBackup="false"
+call "%ALBaseDir%\Tools\DProjVersioning\DProjVersioning.exe" -DProj="%ALBaseDir%\Source\Packages\Alcinoe%ALDelphiName%.dproj" -IncVersion -MajorNumber="13" -MinorNumber="1" -CreateBackup="false"
 FOR /F "tokens=* delims=" %%a IN ('cmd /C "%ALBaseDir%\Tools\DProjVersioning\DProjVersioning.exe -DProj=%ALBaseDir%\Source\Packages\Alcinoe%ALDelphiName%.dproj -GetVersionInfo"') DO (SET Alcinoe_VersionInfo=%%a)
 FOR /F "tokens=* delims=" %%a IN ('cmd /C "%ALBaseDir%\Tools\DProjVersioning\DProjVersioning.exe -DProj=%ALBaseDir%\Source\Packages\Alcinoe%ALDelphiName%.dproj -GetVersionName"') DO (SET Alcinoe_VersionName=%%a)
 Echo New Alcinoe version: %Alcinoe_VersionName% 
@@ -562,6 +562,8 @@ if "%ALBuildTools%"=="Y" (
 
 echo Clean %ALBaseDir%\Compiled
 
+del "%ALBaseDir%\Compiled\*.cmds" /s >nul
+
 for /r "%ALBaseDir%\Compiled" %%D in (_Source) do (
   if exist "%%D" ( rmdir /s /q "%%D" )
 )
@@ -626,14 +628,6 @@ if exist "%FileName%" del "%FileName%" /s >nul
 if exist "%FileName%" EXIT /B 1
 
 SET FileName=%ALBaseDir%\Compiled\Demos\AllDemos.groupproj
-if exist "%FileName%" del "%FileName%" /s >nul
-if exist "%FileName%" EXIT /B 1
-
-SET FileName=%ALBaseDir%\Compiled\Demos\ALLiveVideoChat\ALLiveVideoChat.groupproj
-if exist "%FileName%" del "%FileName%" /s >nul
-if exist "%FileName%" EXIT /B 1
-
-SET FileName=%ALBaseDir%\Compiled\Demos\ALLiveVideoChat\ALLiveVideoChat.groupproj.local
 if exist "%FileName%" del "%FileName%" /s >nul
 if exist "%FileName%" EXIT /B 1
 
